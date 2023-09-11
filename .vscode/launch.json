@@ -13,6 +13,14 @@
       "args": [
         "--conf=./config/conf.example.yml",
       ]
+    },
+    {
+      "name": "debugger spider(maccms)",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "cwd": "spider",
+      "program": "spider/entry/maccms/main.go",
     }
   ]
 }

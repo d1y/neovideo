@@ -54,3 +54,7 @@ _testmain.go
 __debug_*
 
 *.sqlite3
+
+frontend/
+
+data/
