@@ -6,7 +6,9 @@ import (
 
 	"d1y.io/neovideo/config"
 	baseControllers "d1y.io/neovideo/controllers/base"
+	"d1y.io/neovideo/sqls"
 	"github.com/kataras/iris/v12"
+	"gorm.io/gorm"
 )
 
 type NeovideoApp struct {
@@ -23,8 +25,15 @@ func (na *NeovideoApp) Init() {
 	if err != nil {
 		panic(err)
 	}
+	na.initDB()
 	na.App = iris.New()
 	na.Register()
+}
+
+func (na *NeovideoApp) initDB() {
+	if err := sqls.Open(config.Get().Db, &gorm.Config{}); err != nil {
+		panic(err)
+	}
 }
 
 func (na *NeovideoApp) Register() {
@@ -37,6 +46,9 @@ func (na *NeovideoApp) Register() {
 
 func (na *NeovideoApp) getPort() string {
 	port := config.Get().Port
+	if port == 0 {
+		panic("port is required")
+	}
 	return fmt.Sprintf(":%d", port)
 }
 
