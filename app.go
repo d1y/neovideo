@@ -29,7 +29,9 @@ func (na *NeovideoApp) Init() {
 
 func (na *NeovideoApp) Register() {
 	na.App.PartyFunc("/api/v1", func(u iris.Party) {
-		baseControllers.Register(u)
+		u.PartyFunc("/base", func(u iris.Party) {
+			baseControllers.Register(u)
+		})
 	})
 }
 
