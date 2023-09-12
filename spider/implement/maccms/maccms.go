@@ -132,14 +132,30 @@ func (m *IMacCMS) parseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSListV
 	return listAttr, videos, nil
 }
 
-func (m *IMacCMS) GetHome() (IMacCMSHomeData, error) {
-	res, err := req.Get(m.ApiURL)
+func (m *IMacCMS) getURL2XMLDocument(url string) (*etree.Document, error) {
+	res, err := req.Get(url)
 	if err != nil {
-		return IMacCMSHomeData{}, err
+		return &etree.Document{}, err
 	}
 	doc := etree.NewDocument()
 	doc.ReadFrom(res.Body)
+	return doc, nil
+}
+
+func (m *IMacCMS) getURL2XMLDocumentWithRoot(url string) (*etree.Element, error) {
+	doc, err := m.getURL2XMLDocument(url)
+	if err != nil {
+		return &etree.Element{}, err
+	}
 	root := doc.Root()
+	return root, nil
+}
+
+func (m *IMacCMS) GetHome() (IMacCMSHomeData, error) {
+	root, err := m.getURL2XMLDocumentWithRoot(m.ApiURL)
+	if err != nil {
+		return IMacCMSHomeData{}, err
+	}
 	var data IMacCMSHomeData
 	for _, child := range root.Child {
 		if c, ok := child.(*etree.Element); ok {
@@ -157,6 +173,17 @@ func (m *IMacCMS) GetHome() (IMacCMSHomeData, error) {
 	return data, nil
 }
 
-func (m *IMacCMS) GetCategory() {
-
+func (m *IMacCMS) GetCategory() ([]IMacCMSCategory, error) {
+	root, err := m.getURL2XMLDocumentWithRoot(m.ApiURL)
+	if err != nil {
+		return []IMacCMSCategory{}, err
+	}
+	for _, child := range root.Child {
+		if c, ok := child.(*etree.Element); ok {
+			if c.Tag == "class" {
+				return m.parseClassGetCategory(c), nil
+			}
+		}
+	}
+	return []IMacCMSCategory{}, nil
 }
