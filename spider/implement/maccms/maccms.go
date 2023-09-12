@@ -3,6 +3,7 @@ package maccms
 import (
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/beevik/etree"
@@ -26,14 +27,27 @@ type IMacCMSListAttr struct {
 	RecordCount int `json:"record_count,omitempty"`
 }
 
+type IMacCMSVideoDDTag struct {
+	Flag   string `json:"flag,omitempty"`
+	RawURL string `json:"raw_url,omitempty"`
+}
+
 type IMacCMSListVideoItem struct {
-	Last time.Time `json:"last,omitempty"`
-	Id   int       `json:"id,omitempty"`
-	Tid  int       `json:"tid,omitempty"`
-	Name string    `json:"name,omitempty"`
-	Type string    `json:"type,omitempty"`
-	Dt   string    `json:"dt,omitempty"`
-	Note string    `json:"note,omitempty"`
+	Last     time.Time `json:"last,omitempty"`
+	Id       int       `json:"id,omitempty"`
+	Tid      int       `json:"tid,omitempty"`
+	Name     string    `json:"name,omitempty"`
+	Type     string    `json:"type,omitempty"`
+	Dt       string    `json:"dt,omitempty"`
+	Note     string    `json:"note,omitempty"`
+	Desc     string    `json:"desc,omitempty"`
+	Lang     string    `json:"lang,omitempty"`
+	Area     string    `json:"area,omitempty"`
+	Year     string    `json:"year,omitempty"`
+	State    string    `json:"state,omitempty"`
+	Actor    string    `json:"actor,omitempty"`
+	Director string    `json:"director,omitempty"`
+	DD       []IMacCMSVideoDDTag
 }
 
 type IMacCMSVideosAndHeader struct {
@@ -122,21 +136,54 @@ func (m *IMacCMS) parseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSListV
 		var item IMacCMSListVideoItem
 		for _, child := range ele.Child {
 			if c, ok := child.(*etree.Element); ok {
+				var text = c.Text()
 				switch c.Tag {
 				case "last":
-					item.Last, _ = time.Parse(time.DateTime, c.Text())
+					item.Last, _ = time.Parse(time.DateTime, text)
 				case "id":
-					item.Id, _ = strconv.Atoi(c.Text())
+					item.Id, _ = strconv.Atoi(text)
 				case "tid":
-					item.Tid, _ = strconv.Atoi(c.Text())
+					item.Tid, _ = strconv.Atoi(text)
 				case "name":
-					item.Name = c.Text()
+					item.Name = text
 				case "type":
-					item.Type = c.Text()
+					item.Type = text
 				case "dt":
-					item.Dt = c.Text()
+					item.Dt = text
 				case "note":
-					item.Note = c.Text()
+					item.Note = text
+				case "des":
+					item.Desc = text
+				case "lang":
+					item.Lang = text
+				case "area":
+					item.Area = text
+				case "year":
+					item.Year = text
+				case "state":
+					item.State = text
+				case "actor":
+					item.Actor = text
+				case "director":
+					item.Director = text
+				case "dl":
+					var dd []IMacCMSVideoDDTag
+					for _, el := range c.Child {
+						if e, ok := el.(*etree.Element); ok {
+							if m.isWhichTagWithXMLElement(e, "dd") {
+								var d IMacCMSVideoDDTag
+								for _, attr := range e.Attr {
+									if attr.Key == "flag" {
+										d.Flag = attr.Value
+										break
+									}
+								}
+								d.RawURL = strings.TrimSpace(e.Text())
+								dd = append(dd, d)
+							}
+						}
+					}
+					item.DD = dd
 				}
 			}
 		}
@@ -231,4 +278,24 @@ func (m *IMacCMS) GetSearch(keyword string, page int) (IMacCMSVideosAndHeader, e
 		}
 	}
 	return IMacCMSVideosAndHeader{}, errors.New("not found")
+}
+
+func (m *IMacCMS) GetDetail(id int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
+	res, err := req.R().SetQueryParams(map[string]string{
+		"ac":  "videolist",
+		"ids": strconv.Itoa(id),
+	}).Get(m.ApiURL)
+	if err != nil {
+		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
+	}
+	doc := etree.NewDocument()
+	doc.ReadFrom(res.Body)
+	for _, el := range doc.Root().Child {
+		if e, ok := el.(*etree.Element); ok {
+			if m.isListTagWithXMLElement(e) {
+				return m.parseList(e)
+			}
+		}
+	}
+	return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
 }
