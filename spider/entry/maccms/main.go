@@ -12,7 +12,12 @@ var cms = maccms.NewMacCMS(maccms.MacCMSReponseTypeXML, "https://www.hanjuzy.com
 var wg sync.WaitGroup
 
 func main() {
-	wg.Add(2)
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		data, err := cms.GetSearch("真的出现了", 1)
+		fmt.Println(data, err)
+	}()
 	go func() {
 		defer wg.Done()
 		var data, _ = cms.GetHome()

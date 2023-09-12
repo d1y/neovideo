@@ -3,6 +3,6 @@ package typekit
 type ISpider interface {
 	GetCategory()
 	GetHome()
-	GetSearch()
+	GetSearch(keyword string, page int)
 	GetDetail()
 }

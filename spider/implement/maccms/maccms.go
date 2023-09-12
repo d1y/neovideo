@@ -1,6 +1,7 @@
 package maccms
 
 import (
+	"errors"
 	"strconv"
 	"time"
 
@@ -35,9 +36,14 @@ type IMacCMSListVideoItem struct {
 	Note string    `json:"note,omitempty"`
 }
 
-type IMacCMSHomeData struct {
-	Category   []IMacCMSCategory
+type IMacCMSVideosAndHeader struct {
 	ListHeader IMacCMSListAttr
+	Videos     []IMacCMSListVideoItem
+}
+
+type IMacCMSHomeData struct {
+	ListHeader IMacCMSListAttr
+	Category   []IMacCMSCategory
 	Videos     []IMacCMSListVideoItem
 }
 
@@ -51,6 +57,17 @@ func NewMacCMS(resType string, api string) *IMacCMS {
 		ResponseType: MacCMSReponseTypeJSON,
 		ApiURL:       api,
 	}
+}
+
+func (m *IMacCMS) isWhichTagWithXMLElement(e *etree.Element, tag string) bool {
+	return e.Tag == tag
+}
+
+func (m *IMacCMS) isClassTagWithXMLElement(e *etree.Element) bool {
+	return m.isWhichTagWithXMLElement(e, "class")
+}
+func (m *IMacCMS) isListTagWithXMLElement(e *etree.Element) bool {
+	return m.isWhichTagWithXMLElement(e, "list")
 }
 
 func (m *IMacCMS) parseClassGetCategory(doc *etree.Element) []IMacCMSCategory {
@@ -77,6 +94,25 @@ func (m *IMacCMS) parseClassGetCategory(doc *etree.Element) []IMacCMSCategory {
 		}
 	}
 	return category
+}
+
+func (m *IMacCMS) getURL2XMLDocument(url string) (*etree.Document, error) {
+	res, err := req.Get(url)
+	if err != nil {
+		return &etree.Document{}, err
+	}
+	doc := etree.NewDocument()
+	doc.ReadFrom(res.Body)
+	return doc, nil
+}
+
+func (m *IMacCMS) getURL2XMLDocumentWithRoot(url string) (*etree.Element, error) {
+	doc, err := m.getURL2XMLDocument(url)
+	if err != nil {
+		return &etree.Element{}, err
+	}
+	root := doc.Root()
+	return root, nil
 }
 
 func (m *IMacCMS) parseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
@@ -119,7 +155,7 @@ func (m *IMacCMS) parseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSListV
 	}
 	for _, child := range doc.Child {
 		if e, ok := child.(*etree.Element); ok {
-			if e.Tag == "video" {
+			if m.isWhichTagWithXMLElement(e, "video") {
 				video, err := parseVideo(e)
 				if err == nil {
 					videos = append(videos, video)
@@ -132,25 +168,6 @@ func (m *IMacCMS) parseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSListV
 	return listAttr, videos, nil
 }
 
-func (m *IMacCMS) getURL2XMLDocument(url string) (*etree.Document, error) {
-	res, err := req.Get(url)
-	if err != nil {
-		return &etree.Document{}, err
-	}
-	doc := etree.NewDocument()
-	doc.ReadFrom(res.Body)
-	return doc, nil
-}
-
-func (m *IMacCMS) getURL2XMLDocumentWithRoot(url string) (*etree.Element, error) {
-	doc, err := m.getURL2XMLDocument(url)
-	if err != nil {
-		return &etree.Element{}, err
-	}
-	root := doc.Root()
-	return root, nil
-}
-
 func (m *IMacCMS) GetHome() (IMacCMSHomeData, error) {
 	root, err := m.getURL2XMLDocumentWithRoot(m.ApiURL)
 	if err != nil {
@@ -159,9 +176,9 @@ func (m *IMacCMS) GetHome() (IMacCMSHomeData, error) {
 	var data IMacCMSHomeData
 	for _, child := range root.Child {
 		if c, ok := child.(*etree.Element); ok {
-			if c.Tag == "class" {
+			if m.isClassTagWithXMLElement(c) {
 				data.Category = m.parseClassGetCategory(c)
-			} else if c.Tag == "list" {
+			} else if m.isListTagWithXMLElement(c) {
 				listAttr, videos, _ := m.parseList(c)
 				data.ListHeader = listAttr
 				data.Videos = videos
@@ -180,10 +197,38 @@ func (m *IMacCMS) GetCategory() ([]IMacCMSCategory, error) {
 	}
 	for _, child := range root.Child {
 		if c, ok := child.(*etree.Element); ok {
-			if c.Tag == "class" {
+			if m.isClassTagWithXMLElement(c) {
 				return m.parseClassGetCategory(c), nil
 			}
 		}
 	}
 	return []IMacCMSCategory{}, nil
+}
+
+func (m *IMacCMS) GetSearch(keyword string, page int) (IMacCMSVideosAndHeader, error) {
+	res, err := req.R().SetQueryParams(map[string]string{
+		// "ac": "videolist",
+		"pg": strconv.Itoa(page),
+		"wd": keyword,
+	}).Post(m.ApiURL)
+	if err != nil {
+		return IMacCMSVideosAndHeader{}, err
+	}
+	doc := etree.NewDocument()
+	doc.ReadFrom(res.Body)
+	for _, el := range doc.Root().Child {
+		if e, ok := el.(*etree.Element); ok {
+			if m.isListTagWithXMLElement(e) {
+				a, b, c := m.parseList(e)
+				if c != nil {
+					return IMacCMSVideosAndHeader{}, err
+				}
+				return IMacCMSVideosAndHeader{
+					ListHeader: a,
+					Videos:     b,
+				}, nil
+			}
+		}
+	}
+	return IMacCMSVideosAndHeader{}, errors.New("not found")
 }
