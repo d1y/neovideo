@@ -6,8 +6,10 @@ import (
 
 	"d1y.io/neovideo/config"
 	log "github.com/sirupsen/logrus"
+	gplus "github.com/tiantianlikeu/gorm-plus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -18,9 +20,11 @@ var (
 	sqlDB *sql.DB
 )
 
-func Open(dbConfig config.DbConfig, config *gorm.Config, models ...interface{}) (err error) {
+func Open(dbConfig config.DbConfig, config *gorm.Config /*, models ...interface{}*/) (err error) {
 	if config == nil {
-		config = &gorm.Config{}
+		config = &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		}
 	}
 
 	if config.NamingStrategy == nil {
@@ -44,9 +48,13 @@ func Open(dbConfig config.DbConfig, config *gorm.Config, models ...interface{}) 
 		log.Error(err)
 	}
 
-	if err = db.AutoMigrate(models...); nil != err {
-		log.Errorf("auto migrate tables failed: %s", err.Error())
-	}
+	// https://github.com/tiantianlikeu/gorm-plus
+	// https://github.com/acmestack/gorm-plus
+	gplus.Init(db)
+
+	// if err = db.AutoMigrate(models...); nil != err {
+	// 	log.Errorf("auto migrate tables failed: %s", err.Error())
+	// }
 	return
 }
 
