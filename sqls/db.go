@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"d1y.io/neovideo/config"
+	gplus "github.com/acmestack/gorm-plus/gplus"
 	log "github.com/sirupsen/logrus"
-	gplus "github.com/tiantianlikeu/gorm-plus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -48,7 +48,6 @@ func Open(dbConfig config.DbConfig, config *gorm.Config /*, models ...interface{
 		log.Error(err)
 	}
 
-	// https://github.com/tiantianlikeu/gorm-plus
 	// https://github.com/acmestack/gorm-plus
 	gplus.Init(db)
 

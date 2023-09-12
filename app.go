@@ -6,6 +6,7 @@ import (
 
 	"d1y.io/neovideo/config"
 	baseControllers "d1y.io/neovideo/controllers/base"
+	maccmsControllers "d1y.io/neovideo/controllers/maccms"
 	"d1y.io/neovideo/sqls"
 	"github.com/kataras/iris/v12"
 	"gorm.io/gorm"
@@ -41,6 +42,9 @@ func (na *NeovideoApp) Register() {
 	na.App.PartyFunc("/api/v1", func(u iris.Party) {
 		u.PartyFunc("/base", func(u iris.Party) {
 			baseControllers.Register(u)
+		})
+		u.PartyFunc("/maccms", func(u iris.Party) {
+			maccmsControllers.Register(u)
 		})
 	})
 }
