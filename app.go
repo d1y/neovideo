@@ -34,6 +34,7 @@ func (na *NeovideoApp) initDB() {
 	if err := sqls.Open(config.Get().Db, &gorm.Config{}); err != nil {
 		panic(err)
 	}
+	sqls.AutoMigrate()
 }
 
 func (na *NeovideoApp) Register() {
