@@ -3,6 +3,7 @@ package maccms
 import (
 	"errors"
 	"io"
+	"strconv"
 	"time"
 
 	typekkkit "d1y.io/neovideo/common/typekit"
@@ -60,19 +61,26 @@ func (m *IMacCMS) jsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMS
 	return attr, videos, category
 }
 
+func (m *IMacCMS) response2gjson(res *req.Response) (gjson.Result, error) {
+	buf, err := io.ReadAll(res.Body)
+	if err != nil {
+		return gjson.Result{}, err
+	}
+	if !gjson.ValidBytes(buf) {
+		return gjson.Result{}, errors.New("invalid json")
+	}
+	return gjson.ParseBytes(buf), nil
+}
+
 func (m *IMacCMS) JSONGetHome() (IMacCMSVideosAndHeader, error) {
 	res, err := req.Get(m.ApiURL)
 	if err != nil {
 		return IMacCMSVideosAndHeader{}, err
 	}
-	buf, err := io.ReadAll(res.Body)
+	result, err := m.response2gjson(res)
 	if err != nil {
 		return IMacCMSVideosAndHeader{}, err
 	}
-	if !gjson.ValidBytes(buf) {
-		return IMacCMSVideosAndHeader{}, errors.New("invalid json")
-	}
-	result := gjson.ParseBytes(buf)
 	attr, videos, _ := m.jsonParseBody(result)
 	return IMacCMSVideosAndHeader{
 		ListHeader: attr,
@@ -85,20 +93,31 @@ func (m *IMacCMS) JSONGetCategory() ([]IMacCMSCategory, error) {
 	if err != nil {
 		return []IMacCMSCategory{}, err
 	}
-	buf, err := io.ReadAll(res.Body)
+	result, err := m.response2gjson(res)
 	if err != nil {
 		return []IMacCMSCategory{}, err
 	}
-	if !gjson.ValidBytes(buf) {
-		return []IMacCMSCategory{}, errors.New("invalid json")
-	}
-	result := gjson.ParseBytes(buf)
 	_, _, category := m.jsonParseBody(result)
 	return category, nil
 }
 
-func (m *IMacCMS) JSONGetSearch(keyword string, page int) {
-
+func (m *IMacCMS) JSONGetSearch(keyword string, page int) (IMacCMSVideosAndHeader, error) {
+	res, err := req.R().SetQueryParams(map[string]string{
+		"wd": keyword,
+		"pg": strconv.Itoa(page),
+	}).Get(m.ApiURL)
+	if err != nil {
+		return IMacCMSVideosAndHeader{}, nil
+	}
+	result, err := m.response2gjson(res)
+	if err != nil {
+		return IMacCMSVideosAndHeader{}, nil
+	}
+	attr, videos, _ := m.jsonParseBody(result)
+	return IMacCMSVideosAndHeader{
+		ListHeader: attr,
+		Videos:     videos,
+	}, nil
 }
 
 func (m *IMacCMS) JSONGetDetail(id int) {
