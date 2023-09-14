@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"sync"
 
@@ -9,9 +10,11 @@ import (
 
 var cms = maccms.NewMacCMS(maccms.MacCMSReponseTypeXML, "https://www.hanjuzy.com/inc/api.php")
 
+var maccmsType = flag.String("type", "xml", "接口类型")
+
 var wg sync.WaitGroup
 
-func main() {
+func xmlDemo() {
 	wg.Add(4)
 	go func() {
 		defer wg.Done()
@@ -34,4 +37,18 @@ func main() {
 		fmt.Printf("%v", category)
 	}()
 	wg.Wait()
+}
+
+func jsonDemo() {
+	// TODO: impl this
+	fmt.Println("demo")
+}
+
+func main() {
+	flag.Parse()
+	if *maccmsType == "xml" {
+		xmlDemo()
+	} else if *maccmsType == "json" {
+		jsonDemo()
+	}
 }

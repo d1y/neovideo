@@ -21,6 +21,9 @@
       "mode": "auto",
       "cwd": "spider",
       "program": "spider/entry/maccms/main.go",
+      "args": [
+        "--type=json"
+      ]
     }
   ]
 }
