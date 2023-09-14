@@ -15,22 +15,22 @@ func main() {
 	wg.Add(4)
 	go func() {
 		defer wg.Done()
-		_, data, _ := cms.GetDetail(5292)
+		_, data, _ := cms.XMLGetDetail(5292)
 		fmt.Println(data)
 	}()
 	go func() {
 		defer wg.Done()
-		data, err := cms.GetSearch("真的出现了", 1)
+		data, err := cms.XMLGetSearch("真的出现了", 1)
 		fmt.Println(data, err)
 	}()
 	go func() {
 		defer wg.Done()
-		var data, _ = cms.GetHome()
+		var data, _ = cms.XMLGetHome()
 		fmt.Printf("%v", data)
 	}()
 	go func() {
 		defer wg.Done()
-		var category, _ = cms.GetCategory()
+		var category, _ = cms.XMLGetCategory()
 		fmt.Printf("%v", category)
 	}()
 	wg.Wait()
