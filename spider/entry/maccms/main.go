@@ -10,6 +10,8 @@ import (
 
 var cms = maccms.NewMacCMS(maccms.MacCMSReponseTypeXML, "https://www.hanjuzy.com/inc/api.php")
 
+var jsonCMS = maccms.NewMacCMS(maccms.MacCMSReponseTypeJSON, "https://www.feisuzyapi.com/api.php/provide/vod")
+
 var maccmsType = flag.String("type", "xml", "接口类型")
 
 var wg sync.WaitGroup
@@ -40,8 +42,26 @@ func xmlDemo() {
 }
 
 func jsonDemo() {
-	// TODO: impl this
-	fmt.Println("demo")
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		data, err := jsonCMS.JSONGetHome()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(data)
+	}()
+	go func() {
+		defer wg.Done()
+		data, err := jsonCMS.JSONGetCategory()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(data)
+	}()
+	wg.Wait()
 }
 
 func main() {
