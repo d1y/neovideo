@@ -90,6 +90,14 @@ func (b *MaccmsQSBuilder) String() (string, error) {
 	return string(val), nil
 }
 
+func (b *MaccmsQSBuilder) MustString() string {
+	val, err := json.Marshal(b.Build())
+	if err != nil {
+		return ""
+	}
+	return string(val)
+}
+
 func NewMacCMSQSBuilder(bType string) *MaccmsQSBuilder {
 	m := make(map[string]any)
 	return &MaccmsQSBuilder{
