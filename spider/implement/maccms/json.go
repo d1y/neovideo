@@ -3,7 +3,6 @@ package maccms
 import (
 	"errors"
 	"io"
-	"strconv"
 	"time"
 
 	typekkkit "d1y.io/neovideo/common/typekit"
@@ -102,10 +101,7 @@ func (m *IMacCMS) JSONGetCategory() ([]IMacCMSCategory, error) {
 }
 
 func (m *IMacCMS) JSONGetSearch(keyword string, page int) (IMacCMSVideosAndHeader, error) {
-	res, err := req.R().SetQueryParams(map[string]string{
-		"wd": keyword,
-		"pg": strconv.Itoa(page),
-	}).Get(m.ApiURL)
+	res, err := m.qs.SetKeyword(keyword).SetPage(page).BuildRequest().Get(m.ApiURL)
 	if err != nil {
 		return IMacCMSVideosAndHeader{}, nil
 	}
@@ -121,10 +117,7 @@ func (m *IMacCMS) JSONGetSearch(keyword string, page int) (IMacCMSVideosAndHeade
 }
 
 func (m *IMacCMS) JSONGetDetail(id int) ([]IMacCMSListVideoItem, error) {
-	res, err := req.R().SetQueryParams(map[string]string{
-		"ac":  "detail",
-		"ids": strconv.Itoa(id),
-	}).Get(m.ApiURL)
+	res, err := m.qs.SetDetailAction().SetIDS(id).BuildRequest().Get(m.ApiURL)
 	if err != nil {
 		return []IMacCMSListVideoItem{}, err
 	}

@@ -1,16 +1,21 @@
 package maccms
 
-import "d1y.io/neovideo/common/json"
+import (
+	"d1y.io/neovideo/common/json"
+)
 
 type IMacCMS struct {
 	ResponseType string `json:"response_type,omitempty"`
 	ApiURL       string `json:"api_url,omitempty"`
+	qs           *MaccmsQSBuilder
 }
 
 func NewMacCMS(resType string, api string) *IMacCMS {
+	qs := NewMacCMSQSBuilder(resType)
 	return &IMacCMS{
 		ResponseType: MacCMSReponseTypeJSON,
 		ApiURL:       api,
+		qs:           qs,
 	}
 }
 

@@ -1,4 +1,4 @@
-package other
+package maccms
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"d1y.io/neovideo/spider/implement/maccms"
 	"github.com/imroc/req/v3"
 )
 
@@ -15,47 +14,47 @@ const (
 	MacCMSDetailAction = "detail"
 )
 
-type maccmsQSBuilder struct {
+type MaccmsQSBuilder struct {
 	buildType string
 	m         map[string]any
 }
 
-func (b *maccmsQSBuilder) SetKeyword(keyword string) *maccmsQSBuilder {
+func (b *MaccmsQSBuilder) SetKeyword(keyword string) *MaccmsQSBuilder {
 	b.m["wd"] = keyword
 	return b
 }
 
-func (b *maccmsQSBuilder) SetPage(page int) *maccmsQSBuilder {
+func (b *MaccmsQSBuilder) SetPage(page int) *MaccmsQSBuilder {
 	b.m["pg"] = page
 	return b
 }
 
-func (b *maccmsQSBuilder) SetAction(ac string) *maccmsQSBuilder {
+func (b *MaccmsQSBuilder) SetAction(ac string) *MaccmsQSBuilder {
 	b.m["ac"] = ac
 	return b
 }
 
-func (b *maccmsQSBuilder) SetListAction() *maccmsQSBuilder {
+func (b *MaccmsQSBuilder) SetListAction() *MaccmsQSBuilder {
 	b.SetAction(MacCMSListAction)
 	return b
 }
 
-func (b *maccmsQSBuilder) SetDetailAction() *maccmsQSBuilder {
+func (b *MaccmsQSBuilder) SetDetailAction() *MaccmsQSBuilder {
 	b.SetAction(MacCMSDetailAction)
 	return b
 }
 
-func (b *maccmsQSBuilder) SetCategory(id int) *maccmsQSBuilder {
+func (b *MaccmsQSBuilder) SetCategory(id int) *MaccmsQSBuilder {
 	b.m["t"] = id
 	return b
 }
 
-func (b *maccmsQSBuilder) SetHWithTime(h int) *maccmsQSBuilder {
+func (b *MaccmsQSBuilder) SetHWithTime(h int) *MaccmsQSBuilder {
 	b.m["h"] = h // 几小时内的数据
 	return b
 }
 
-func (b *maccmsQSBuilder) SetIDS(ids ...int) *maccmsQSBuilder {
+func (b *MaccmsQSBuilder) SetIDS(ids ...int) *MaccmsQSBuilder {
 	strSlice := make([]string, len(ids))
 	for i, id := range ids {
 		strSlice[i] = strconv.Itoa(id)
@@ -65,7 +64,7 @@ func (b *maccmsQSBuilder) SetIDS(ids ...int) *maccmsQSBuilder {
 	return b
 }
 
-func (b *maccmsQSBuilder) Build() map[string]string {
+func (b *MaccmsQSBuilder) Build() map[string]string {
 	var result = make(map[string]string)
 	for k, v := range b.m {
 		if strV, ok := v.(string); ok {
@@ -79,11 +78,11 @@ func (b *maccmsQSBuilder) Build() map[string]string {
 	return result
 }
 
-func (b *maccmsQSBuilder) BuildRequest() *req.Request {
+func (b *MaccmsQSBuilder) BuildRequest() *req.Request {
 	return req.R().SetQueryParams(b.Build())
 }
 
-func (b *maccmsQSBuilder) String() (string, error) {
+func (b *MaccmsQSBuilder) String() (string, error) {
 	val, err := json.Marshal(b.Build())
 	if err != nil {
 		return "", err
@@ -91,18 +90,18 @@ func (b *maccmsQSBuilder) String() (string, error) {
 	return string(val), nil
 }
 
-func NewMacCMSQSBuilder(bType string) *maccmsQSBuilder {
+func NewMacCMSQSBuilder(bType string) *MaccmsQSBuilder {
 	m := make(map[string]any)
-	return &maccmsQSBuilder{
+	return &MaccmsQSBuilder{
 		buildType: bType,
 		m:         m,
 	}
 }
 
-func NewMacCMSXMLQSBuilder() *maccmsQSBuilder {
-	return NewMacCMSQSBuilder(maccms.MacCMSReponseTypeXML)
+func NewMacCMSXMLQSBuilder() *MaccmsQSBuilder {
+	return NewMacCMSQSBuilder(MacCMSReponseTypeXML)
 }
 
-func NewMacCMSJSONQSBuilder() *maccmsQSBuilder {
-	return NewMacCMSQSBuilder(maccms.MacCMSReponseTypeJSON)
+func NewMacCMSJSONQSBuilder() *MaccmsQSBuilder {
+	return NewMacCMSQSBuilder(MacCMSReponseTypeJSON)
 }

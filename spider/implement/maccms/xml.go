@@ -190,11 +190,7 @@ func (m *IMacCMS) XMLGetCategory() ([]IMacCMSCategory, error) {
 }
 
 func (m *IMacCMS) XMLGetSearch(keyword string, page int) (IMacCMSVideosAndHeader, error) {
-	res, err := req.R().SetQueryParams(map[string]string{
-		// "ac": "videolist",
-		"pg": strconv.Itoa(page),
-		"wd": keyword,
-	}).Post(m.ApiURL)
+	res, err := m.qs.SetPage(page).SetKeyword(keyword).BuildRequest().Post(m.ApiURL)
 	if err != nil {
 		return IMacCMSVideosAndHeader{}, err
 	}
@@ -218,10 +214,7 @@ func (m *IMacCMS) XMLGetSearch(keyword string, page int) (IMacCMSVideosAndHeader
 }
 
 func (m *IMacCMS) XMLGetDetail(id int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
-	res, err := req.R().SetQueryParams(map[string]string{
-		"ac":  "videolist",
-		"ids": strconv.Itoa(id),
-	}).Get(m.ApiURL)
+	res, err := m.qs.SetAction("videolist").SetIDS(id).BuildRequest().Get(m.ApiURL)
 	if err != nil {
 		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
 	}
