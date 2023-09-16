@@ -13,3 +13,11 @@ func TestQs(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestQsIDs(t *testing.T) {
+	qs := maccms.NewMacCMSXMLQSBuilder().SetIDS(1, 2, 3, 4)
+	realVal, _ := qs.String()
+	if realVal != `{"ids":"1,2,3,4"}` {
+		t.Fail()
+	}
+}
