@@ -5,5 +5,5 @@ import (
 )
 
 func AutoMigrate() {
-	db.AutoMigrate(&repos.MacCMSRepo{})
+	db.AutoMigrate(&repos.MacCMSRepo{}, &repos.JiexiRepo{})
 }
