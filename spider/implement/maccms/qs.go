@@ -78,8 +78,13 @@ func (b *MaccmsQSBuilder) Build() map[string]string {
 	return result
 }
 
+func (b *MaccmsQSBuilder) wrapperRequestHeader(r *req.Request) *req.Request {
+	r.SetHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36")
+	return r
+}
+
 func (b *MaccmsQSBuilder) BuildRequest() *req.Request {
-	return req.R().SetQueryParams(b.Build())
+	return b.wrapperRequestHeader(req.R().SetQueryParams(b.Build()))
 }
 
 func (b *MaccmsQSBuilder) String() (string, error) {
