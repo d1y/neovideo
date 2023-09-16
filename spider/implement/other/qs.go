@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"d1y.io/neovideo/spider/implement/maccms"
+	"github.com/imroc/req/v3"
 )
 
 const (
@@ -76,6 +77,10 @@ func (b *maccmsQSBuilder) Build() map[string]string {
 		}
 	}
 	return result
+}
+
+func (b *maccmsQSBuilder) BuildRequest() *req.Request {
+	return req.R().SetQueryParams(b.Build())
 }
 
 func (b *maccmsQSBuilder) String() (string, error) {
