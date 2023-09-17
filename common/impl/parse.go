@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"errors"
 	"regexp"
 	"strings"
 
@@ -12,6 +13,16 @@ var jiexiURLFuzzyReg = regexp.MustCompile(`(?i)(jiexi|jiexiurl|url)=`)
 var jiexiURLReg = regexp.MustCompile(`^https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]`)
 var jiexiURLAndNoteReg = regexp.MustCompile(`^(\S*:?)\s*(https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]=)`)
 var jiexiIgnoreReg = regexp.MustCompile(`^(//|;)`)
+
+func gjsonGGGetString(g gjson.Result, s ...string) (string, error) {
+	for _, v := range s {
+		s := g.Get(v).String()
+		if len(s) >= 1 {
+			return s, nil
+		}
+	}
+	return "", errors.New("not match")
+}
 
 func parseJiexiWithLines(raw string) []JiexiParse {
 	var result = make([]JiexiParse, 0)
@@ -44,16 +55,33 @@ func parseJiexiWithLines(raw string) []JiexiParse {
 }
 
 func parseJiexiWithJSON(raw string) []JiexiParse {
-	return nil
+	var result = make([]JiexiParse, 0)
+	gs := gjson.Parse(raw)
+	if gs.IsArray() {
+		for _, item := range gs.Array() {
+			if item.IsObject() {
+				t, e1 := gjsonGGGetString(item, "name", "title")
+				u, e2 := gjsonGGGetString(item, "url", "jiexi_url", "jiexi_url", "jiexiUrl") /* 不校验 url */
+				if e1 != nil && e2 != nil {
+					continue
+				}
+				result = append(result, JiexiParse{URL: u, Name: t})
+			} else {
+				if jiexiURLReg.MatchString(item.String()) {
+					result = append(result, JiexiParse{URL: item.String()})
+				}
+			}
+		}
+	} /* else if gs.IsObject() {
+	}*/
+	return result
 }
 
 func ParseJiexi(raw string) []JiexiParse {
-	// 1. 先检测是否是 json
 	if json.VerifyStringIsJSON(raw) && gjson.Valid(raw) {
 		return parseJiexiWithJSON(raw)
 	}
-	// 2. 不是 json 的话就按每行处理
-	return parseJiexiWithLines(raw)
+	return parseJiexiWithLines(raw) // 不是 json 的话就按每行处理
 }
 
 func ParseMaccms(raw string) {
