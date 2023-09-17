@@ -6,6 +6,7 @@ import (
 
 	"d1y.io/neovideo/config"
 	baseControllers "d1y.io/neovideo/controllers/base"
+	jiexiControllers "d1y.io/neovideo/controllers/jiexi"
 	maccmsControllers "d1y.io/neovideo/controllers/maccms"
 	"d1y.io/neovideo/sqls"
 	"github.com/kataras/iris/v12"
@@ -45,6 +46,9 @@ func (na *NeovideoApp) Register() {
 		})
 		u.PartyFunc("/maccms", func(u iris.Party) {
 			maccmsControllers.Register(u)
+		})
+		u.PartyFunc("/jiexi", func(u iris.Party) {
+			jiexiControllers.Register(u)
 		})
 	})
 }
