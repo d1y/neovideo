@@ -11,13 +11,14 @@ import (
 var jiexiURLFuzzyReg = regexp.MustCompile(`(?i)(jiexi|jiexiurl|url)=`)
 var jiexiURLReg = regexp.MustCompile(`^https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]`)
 var jiexiURLAndNoteReg = regexp.MustCompile(`^(\S*:?)\s*(https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]=)`)
+var jiexiIgnoreReg = regexp.MustCompile(`^(//|;)`)
 
 func parseJiexiWithLines(raw string) []JiexiParse {
 	var result = make([]JiexiParse, 0)
 	lines := strings.Split(raw, "\n")
 	for _, item := range lines {
 		s := strings.TrimSpace(item)
-		if len(s) <= 6 || !jiexiURLFuzzyReg.MatchString(s) {
+		if len(s) <= 6 || !jiexiURLFuzzyReg.MatchString(s) || jiexiIgnoreReg.MatchString(s) {
 			continue
 		}
 		var i JiexiParse
