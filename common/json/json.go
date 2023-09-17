@@ -17,6 +17,9 @@ var MAGIC_END_SYMBOL = []string{
 }
 
 func VerifyStringIsJSON(vJSON string) bool {
+	if len(vJSON) <= 3 {
+		return false
+	}
 	target := strings.TrimSpace(vJSON)
 	start := string(target[0])
 	end := string(target[len(target)-1])
