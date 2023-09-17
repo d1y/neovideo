@@ -23,23 +23,27 @@ func (m *IMacCMS) gjsonResult2Time(r gjson.Result, key string) time.Time {
 	return t
 }
 
-func (m *IMacCMS) jsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMSListVideoItem, []IMacCMSCategory) {
+func (m *IMacCMS) JsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMSListVideoItem, []IMacCMSCategory) {
 
 	var attr IMacCMSListAttr
-	ints := typekkkit.Int64Slice2Int(result.Get("pagecount").Int(), result.Get("page").Int(), result.Get("total").Int())
+	ints := typekkkit.Int64Slice2Int(result.Get("pagecount").Int(), result.Get("page").Int(), result.Get("total").Int(), result.Get("limit").Int())
 	attr.PageCount = ints[0]
 	attr.Page = ints[1]
 	attr.RecordCount = ints[2]
+	attr.PageSize = ints[3]
 
 	_class := result.Get("class").Array()
 	_list := result.Get("list").Array()
 
-	var category = make([]IMacCMSCategory, len(_class))
-	var videos = make([]IMacCMSListVideoItem, len(_list))
+	var category []IMacCMSCategory
+	var videos []IMacCMSListVideoItem
 
 	for _, item := range _list {
 		typeID := m.gjsonResult2Int(item, "type_id")
-		id := m.gjsonResult2Int(item, "id")
+		id := m.gjsonResult2Int(item, "vod_id")
+		if id == 0 {
+			id = m.gjsonResult2Int(item, "id")
+		}
 		t := m.gjsonResult2Time(item, "vod_time")
 		name := m.gjsonResult2Str(item, "vod_name")
 		videos = append(videos, IMacCMSListVideoItem{
@@ -80,7 +84,7 @@ func (m *IMacCMS) JSONGetHome() (IMacCMSVideosAndHeader, error) {
 	if err != nil {
 		return IMacCMSVideosAndHeader{}, err
 	}
-	attr, videos, _ := m.jsonParseBody(result)
+	attr, videos, _ := m.JsonParseBody(result)
 	return IMacCMSVideosAndHeader{
 		ListHeader: attr,
 		Videos:     videos,
@@ -96,7 +100,7 @@ func (m *IMacCMS) JSONGetCategory() ([]IMacCMSCategory, error) {
 	if err != nil {
 		return []IMacCMSCategory{}, err
 	}
-	_, _, category := m.jsonParseBody(result)
+	_, _, category := m.JsonParseBody(result)
 	return category, nil
 }
 
@@ -109,7 +113,7 @@ func (m *IMacCMS) JSONGetSearch(keyword string, page int) (IMacCMSVideosAndHeade
 	if err != nil {
 		return IMacCMSVideosAndHeader{}, nil
 	}
-	attr, videos, _ := m.jsonParseBody(result)
+	attr, videos, _ := m.JsonParseBody(result)
 	return IMacCMSVideosAndHeader{
 		ListHeader: attr,
 		Videos:     videos,
@@ -125,6 +129,6 @@ func (m *IMacCMS) JSONGetDetail(id int) ([]IMacCMSListVideoItem, error) {
 	if err != nil {
 		return []IMacCMSListVideoItem{}, err
 	}
-	_, videos, _ := m.jsonParseBody(result)
+	_, videos, _ := m.JsonParseBody(result)
 	return videos, nil
 }
