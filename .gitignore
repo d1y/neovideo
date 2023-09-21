@@ -55,6 +55,8 @@ __debug_*
 
 *.sqlite3
 
-frontend/
+frontend/demo
 
 data/
+
+web/admin
