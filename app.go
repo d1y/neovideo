@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"fmt"
 
@@ -37,6 +38,10 @@ func (na *NeovideoApp) initDB() {
 		panic(err)
 	}
 	sqls.AutoMigrate()
+}
+
+func (na *NeovideoApp) GetDB() *sql.DB {
+	return sqls.RealDb()
 }
 
 func (na *NeovideoApp) Register() {
