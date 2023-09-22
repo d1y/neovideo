@@ -24,6 +24,21 @@
       "args": [
         "--type=json"
       ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "web admin run devserver",
+      "cwd": "${workspaceRoot}/frontend/admin",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"]
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "web admin debugger",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend/admin/src",
     }
   ]
 }
