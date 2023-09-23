@@ -71,7 +71,8 @@ func (jx *JiexiController) batchImport(ctx iris.Context) {
 		web.NewJSONResultWithError(err).Build(ctx)
 		return
 	}
-	web.NewJSONResultWithMessage(fmt.Sprintf("新增成功(%d条)", len(importJiexi))).SetSuccessWithBool(true).Build(ctx)
+	importLen := len(importJiexi)
+	web.NewJSONResultWithMessage(fmt.Sprintf("新增成功(%d条)", importLen)).SetData(importLen).SetSuccessWithBool(true).Build(ctx)
 }
 
 func Register(u iris.Party) {
