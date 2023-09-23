@@ -14,7 +14,7 @@ type JiexiController struct {
 }
 
 func (jx *JiexiController) getList(ctx iris.Context) {
-	jiexi, db := gplus.SelectList[repos.JiexiRepoWithModel](nil)
+	jiexi, db := gplus.SelectList[repos.JiexiRepo](nil)
 	if db.Error != nil {
 		web.NewJSONResultWithError(db.Error).Build(ctx)
 		return
@@ -23,12 +23,12 @@ func (jx *JiexiController) getList(ctx iris.Context) {
 }
 
 func (jx *JiexiController) create(ctx iris.Context) {
-	var jiexiForm repos.JiexiRepo
+	var jiexiForm repos.IJiexi
 	ctx.ReadBody(&jiexiForm)
-	var insertData = repos.JiexiRepoWithModel{
-		JiexiRepo: jiexiForm,
+	var insertData = repos.JiexiRepo{
+		IJiexi: jiexiForm,
 	}
-	err := gplus.Insert[repos.JiexiRepoWithModel](&insertData).Error
+	err := gplus.Insert[repos.JiexiRepo](&insertData).Error
 	if err != nil {
 		web.NewJSONResultWithError(err).Build(ctx)
 		return
@@ -38,7 +38,7 @@ func (jx *JiexiController) create(ctx iris.Context) {
 
 func (jx *JiexiController) delete(ctx iris.Context) {
 	id := ctx.Params().Get("id")
-	err := gplus.DeleteById[repos.JiexiRepoWithModel](id).Error
+	err := gplus.DeleteById[repos.JiexiRepo](id).Error
 	if err != nil {
 		web.NewJSONResultWithError(err).Build(ctx)
 		return
@@ -57,10 +57,10 @@ func (jx *JiexiController) batchImport(ctx iris.Context) {
 		web.NewJSONResultWithMessage("导入数据为空").SetSuccessWithBool(false).Build(ctx)
 		return
 	}
-	var importJiexi = make([]*repos.JiexiRepoWithModel, 0)
+	var importJiexi = make([]*repos.JiexiRepo, 0)
 	for _, item := range list {
-		importJiexi = append(importJiexi, &repos.JiexiRepoWithModel{
-			JiexiRepo: repos.JiexiRepo{
+		importJiexi = append(importJiexi, &repos.JiexiRepo{
+			IJiexi: repos.IJiexi{
 				Name: item.Name,
 				URL:  item.URL,
 			},

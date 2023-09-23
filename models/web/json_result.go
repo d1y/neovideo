@@ -56,7 +56,7 @@ func NewJSONResultWithMessage(msg string) *JsonResult[any] {
 func NewJSONResultWithSuccess[T any](data T) *JsonResult[T] {
 	return &JsonResult[T]{
 		Success: true,
-		Message: ActionFail,
+		Message: ActionSuccess,
 		Data:    data,
 	}
 }
