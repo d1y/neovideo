@@ -20,6 +20,10 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+    },
     "types": [
       "element-plus/global",
       "./auto-imports",
