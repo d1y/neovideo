@@ -107,11 +107,11 @@ func (m *IMacCMS) JSONGetCategory() ([]IMacCMSCategory, error) {
 func (m *IMacCMS) JSONGetSearch(keyword string, page int) (IMacCMSVideosAndHeader, error) {
 	res, err := m.qs.SetKeyword(keyword).SetPage(page).BuildRequest().Get(m.ApiURL)
 	if err != nil {
-		return IMacCMSVideosAndHeader{}, nil
+		return IMacCMSVideosAndHeader{}, err
 	}
 	result, err := m.response2gjson(res)
 	if err != nil {
-		return IMacCMSVideosAndHeader{}, nil
+		return IMacCMSVideosAndHeader{}, err
 	}
 	attr, videos, _ := m.JsonParseBody(result)
 	return IMacCMSVideosAndHeader{
