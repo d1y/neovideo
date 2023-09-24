@@ -46,6 +46,16 @@ func (jx *JiexiController) delete(ctx iris.Context) {
 	web.NewJSONResultWithSuccess(id).SetMessage("删除成功").Build(ctx)
 }
 
+func (jx *JiexiController) list2map(raw []*repos.JiexiRepo) map[string]*repos.JiexiRepo {
+	var m = make(map[string]*repos.JiexiRepo)
+	for _, item := range raw {
+		if len(item.URL) >= 1 {
+			m[item.URL] = item
+		}
+	}
+	return m
+}
+
 func (jx *JiexiController) batchImport(ctx iris.Context) {
 	importData := ctx.FormValueDefault("data", "")
 	if len(importData) == 0 {
@@ -57,14 +67,27 @@ func (jx *JiexiController) batchImport(ctx iris.Context) {
 		web.NewJSONResultWithMessage("导入数据为空").SetSuccessWithBool(false).Build(ctx)
 		return
 	}
+	jiexiRepos, g := gplus.SelectList[repos.JiexiRepo](nil)
+	if g.Error != nil {
+		web.NewJSONResultWithError(g.Error).Build(ctx)
+		return
+	}
+	mp := jx.list2map(jiexiRepos)
 	var importJiexi = make([]*repos.JiexiRepo, 0)
 	for _, item := range list {
+		if _, ok := mp[item.URL]; ok {
+			continue
+		}
 		importJiexi = append(importJiexi, &repos.JiexiRepo{
 			IJiexi: repos.IJiexi{
 				Name: item.Name,
 				URL:  item.URL,
 			},
 		})
+	}
+	if len(importJiexi) <= 0 {
+		web.NewJSONResultWithMessage("导入数据为空").SetSuccessWithBool(true).SetData(0).Build(ctx)
+		return
 	}
 	err := gplus.InsertBatch(importJiexi).Error
 	if err != nil {

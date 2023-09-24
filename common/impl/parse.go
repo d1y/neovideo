@@ -77,10 +77,25 @@ func parseJiexiWithJSON(raw string) []JiexiParse {
 }
 
 func ParseJiexi(raw string) []JiexiParse {
+	var m = make(map[string]JiexiParse)
 	if json.VerifyStringIsJSON(raw) && gjson.Valid(raw) {
-		return parseJiexiWithJSON(raw)
+		for _, item := range parseJiexiWithJSON(raw) {
+			if len(item.URL) >= 1 {
+				m[item.URL] = item
+			}
+		}
+	} else {
+		for _, item := range parseJiexiWithLines(raw) {
+			if len(item.URL) >= 1 {
+				m[item.URL] = item
+			}
+		}
 	}
-	return parseJiexiWithLines(raw) // 不是 json 的话就按每行处理
+	var result = make([]JiexiParse, 0)
+	for _, v := range m {
+		result = append(result, v)
+	}
+	return result
 }
 
 func ParseMaccms(raw string) {
