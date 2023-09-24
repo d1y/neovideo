@@ -21,7 +21,6 @@ func (jr *JsonResult[T]) SetMessage(msg string) *JsonResult[T] {
 }
 
 func (jr *JsonResult[T]) SetData(data T) *JsonResult[T] {
-	jr.Message = ActionFail
 	jr.Data = data
 	return jr
 }
