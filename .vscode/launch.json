@@ -15,17 +15,6 @@
       ]
     },
     {
-      "name": "debugger spider(maccms)",
-      "type": "go",
-      "request": "launch",
-      "mode": "auto",
-      "cwd": "spider",
-      "program": "spider/entry/maccms/main.go",
-      "args": [
-        "--type=json"
-      ]
-    },
-    {
       "type": "node",
       "request": "launch",
       "name": "web admin run devserver",
