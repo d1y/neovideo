@@ -75,19 +75,20 @@ func (m *IMacCMS) response2gjson(res *req.Response) (gjson.Result, error) {
 	return gjson.ParseBytes(buf), nil
 }
 
-func (m *IMacCMS) JSONGetHome() (IMacCMSVideosAndHeader, error) {
+func (m *IMacCMS) JSONGetHome() (IMacCMSHomeData, error) {
 	res, err := req.Get(m.ApiURL)
 	if err != nil {
-		return IMacCMSVideosAndHeader{}, err
+		return IMacCMSHomeData{}, err
 	}
 	result, err := m.response2gjson(res)
 	if err != nil {
-		return IMacCMSVideosAndHeader{}, err
+		return IMacCMSHomeData{}, err
 	}
-	attr, videos, _ := m.JsonParseBody(result)
-	return IMacCMSVideosAndHeader{
+	attr, videos, category := m.JsonParseBody(result)
+	return IMacCMSHomeData{
 		ListHeader: attr,
 		Videos:     videos,
+		Category:   category,
 	}, nil
 }
 
@@ -120,15 +121,15 @@ func (m *IMacCMS) JSONGetSearch(keyword string, page int) (IMacCMSVideosAndHeade
 	}, nil
 }
 
-func (m *IMacCMS) JSONGetDetail(id int) ([]IMacCMSListVideoItem, error) {
+func (m *IMacCMS) JSONGetDetail(id int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
 	res, err := m.qs.SetDetailAction().SetIDS(id).BuildRequest().Get(m.ApiURL)
 	if err != nil {
-		return []IMacCMSListVideoItem{}, err
+		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
 	}
 	result, err := m.response2gjson(res)
 	if err != nil {
-		return []IMacCMSListVideoItem{}, err
+		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
 	}
-	_, videos, _ := m.JsonParseBody(result)
-	return videos, nil
+	attr, videos, _ := m.JsonParseBody(result)
+	return attr, videos, nil
 }

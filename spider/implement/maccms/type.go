@@ -3,8 +3,8 @@ package maccms
 import "time"
 
 const (
-	MacCMSReponseTypeXML  = "xml"
-	MacCMSReponseTypeJSON = "Json"
+	MacCMSReponseTypeXML  = "XML"
+	MacCMSReponseTypeJSON = "JSON"
 )
 
 type IMacCMSCategory struct {
