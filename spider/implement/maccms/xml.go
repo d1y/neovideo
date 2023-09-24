@@ -50,7 +50,7 @@ func (m *IMacCMS) xmlParseClassGetCategory(doc *etree.Element) []IMacCMSCategory
 func (m *IMacCMS) xmlGetURL2XMLDocument(url string) (*etree.Document, error) {
 	res, err := req.Get(url)
 	if err != nil {
-		return &etree.Document{}, err
+		return nil, err
 	}
 	doc := etree.NewDocument()
 	doc.ReadFrom(res.Body)
@@ -60,7 +60,7 @@ func (m *IMacCMS) xmlGetURL2XMLDocument(url string) (*etree.Document, error) {
 func (m *IMacCMS) xmlGetURL2XMLDocumentWithRoot(url string) (*etree.Element, error) {
 	doc, err := m.xmlGetURL2XMLDocument(url)
 	if err != nil {
-		return &etree.Element{}, err
+		return nil, err
 	}
 	root := doc.Root()
 	return root, nil
