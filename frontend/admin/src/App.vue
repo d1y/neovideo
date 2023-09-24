@@ -1,6 +1,6 @@
 <template>
   <el-button-group>
-    <el-button>创建线路</el-button>
+    <el-button @click="create">创建线路</el-button>
     <el-button>批量导入</el-button>
   </el-button-group>
   <el-table ref="tableRef" row-key="date" :data="tableData" style="width: 100%">
@@ -18,9 +18,11 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { ElMessage, type TableInstance } from 'element-plus'
+import { ElMessage, ElMessageBox, type TableInstance } from 'element-plus'
 import * as jiexiApi from '@/api/jiexi'
 import { onMounted } from 'vue'
+import jiexiForm from './jiexi_form.vue'
+import { h } from 'vue'
 
 const tableRef = ref<TableInstance>()
 
@@ -34,6 +36,14 @@ async function getData() {
     note: "白嫖",
     id: 12,
   }]
+}
+
+async function create() {
+  ElMessageBox({
+    title: "新建线路",
+    showConfirmButton: false,
+    message: h(jiexiForm),
+  })
 }
 
 async function del(idx: int) {
