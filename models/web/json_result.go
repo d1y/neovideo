@@ -46,13 +46,13 @@ func (jr *JsonResult[T]) Build(ctx iris.Context) {
 	ctx.JSON(jr)
 }
 
-func NewJSONResultWithMessage(msg string) *JsonResult[any] {
+func NewMessage(msg string) *JsonResult[any] {
 	return &JsonResult[any]{
 		Message: msg,
 	}
 }
 
-func NewJSONResultWithSuccess[T any](data T) *JsonResult[T] {
+func NewSuccess[T any](data T) *JsonResult[T] {
 	return &JsonResult[T]{
 		Success: true,
 		Message: ActionSuccess,
@@ -60,7 +60,7 @@ func NewJSONResultWithSuccess[T any](data T) *JsonResult[T] {
 	}
 }
 
-func NewJSONResultWithError(err error) *JsonResult[any] {
+func NewError(err error) *JsonResult[any] {
 	return &JsonResult[any]{
 		Message: err.Error(),
 		Success: false,

@@ -98,6 +98,12 @@ func ParseJiexi(raw string) []JiexiParse {
 	return result
 }
 
-func ParseMaccms(raw string) {
-
+func ParseMaccms(raw string) []MacCMSParse {
+	var result = make([]MacCMSParse, 0)
+	if json.VerifyStringIsJSON(raw) && gjson.Valid(raw) {
+		// TODO: impl json
+	} else {
+		// TODO: impl lines
+	}
+	return result
 }
