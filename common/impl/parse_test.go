@@ -34,22 +34,19 @@ func TestParseJiexiJSON(t *testing.T) {
 
 func TestParseJiexiText(t *testing.T) {
 	jiexi := impl.ParseJiexi(readJiexi("jiexi1", "txt"))
-	if len(jiexi) != 5 {
+	if len(jiexi) != 7 {
 		t.Log("parse len verification failed")
-		t.Fail()
-		return
+		t.FailNow()
 	}
 	if jiexi[0].Name != "白嫖线路" || jiexi[0].URL != "https://jiexi.dev/balabala/url=" {
 		t.Log("jiexi1 parse [0] fail")
-		t.Fail()
-		return
+		t.FailNow()
 	}
 	if jiexi[1].Name != "调试线路" || jiexi[1].URL != "https://patch1.dev/llallalal/url=" {
 		t.Log("jiexi1 parse [1] fail")
-		t.Fail()
-		return
+		t.FailNow()
 	}
-	for i := 2; i < 5; i++ {
+	for i := 2; i < 7; i++ {
 		var item = jiexi[i]
 		if len(item.URL) <= 6 {
 			t.Fail()

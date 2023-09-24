@@ -9,10 +9,11 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-var jiexiURLFuzzyReg = regexp.MustCompile(`(?i)(jiexi|jiexiurl|url)=`)
+var jiexiURLFuzzyReg = regexp.MustCompile(`(?i)(jiexi|jiexiurl|url)?=`)
 var jiexiURLReg = regexp.MustCompile(`^https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]`)
 var jiexiURLAndNoteReg = regexp.MustCompile(`^(\S*:?)\s*(https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]=)`)
 var jiexiIgnoreReg = regexp.MustCompile(`^(//|;)`)
+var symbolReg = regexp.MustCompile(`[,.:：，。]*$`)
 
 func gjsonGGGetString(g gjson.Result, s ...string) (string, error) {
 	for _, v := range s {
@@ -42,9 +43,7 @@ func parseJiexiWithLines(raw string) []JiexiParse {
 			subs := jiexiURLAndNoteReg.FindStringSubmatch(s)
 			if len(subs) == 3 {
 				n, u := subs[1], subs[2]
-				if strings.HasSuffix(n, ":") {
-					n = strings.TrimRight(n, ":")
-				}
+				n = symbolReg.ReplaceAllString(n, "")
 				i.URL = u
 				i.Name = n
 			}
