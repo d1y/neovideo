@@ -46,15 +46,9 @@ func (na *NeovideoApp) GetDB() *sql.DB {
 
 func (na *NeovideoApp) Register() {
 	na.App.PartyFunc("/api/v1", func(u iris.Party) {
-		u.PartyFunc("/base", func(u iris.Party) {
-			baseControllers.Register(u)
-		})
-		u.PartyFunc("/maccms", func(u iris.Party) {
-			maccmsControllers.Register(u)
-		})
-		u.PartyFunc("/jiexi", func(u iris.Party) {
-			jiexiControllers.Register(u)
-		})
+		u.PartyFunc("/base", baseControllers.Register)
+		u.PartyFunc("/maccms", maccmsControllers.Register)
+		u.PartyFunc("/jiexi", jiexiControllers.Register)
 	})
 }
 
