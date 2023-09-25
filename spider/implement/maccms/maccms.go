@@ -29,6 +29,9 @@ func GetResponseType(raw string) string {
 	return MacCMSReponseTypeXML
 }
 
+func (m *IMacCMS) Request(xhr XHRRequest) {
+}
+
 func (m *IMacCMS) GetHome() (IMacCMSHomeData, error) {
 	if m.ResponseType == MacCMSReponseTypeJSON {
 		return m.JSONGetHome()

@@ -8,16 +8,6 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
-type requestForm struct {
-	ResponseType string `json:"r_type" form:"r_type"`
-	Page         int    `json:"page" form:"page"`
-	Keyword      string `json:"keyword" form:"keyword"`
-	Action       string `json:"action" form:"action"`
-	Category     string `json:"category" form:"category"`
-	Hour         int    `json:"hour" form:"hour"`
-	Ids          []int  `json:"ids" form:"ids"`
-}
-
 type IMacCMSProxyController struct {
 	// cc *cache.Cache
 }
@@ -51,7 +41,7 @@ func (pc *IMacCMSProxyController) request(ctx iris.Context) {
 		web.NewError(err).Build(ctx)
 		return
 	}
-	var form requestForm
+	var form maccms.XHRRequest
 	if err := ctx.ReadBody(&form); err != nil {
 		web.NewError(err).Build(ctx)
 		return
@@ -62,10 +52,20 @@ func (pc *IMacCMSProxyController) request(ctx iris.Context) {
 		return
 	}
 	cms := maccms.New(data.RespType, data.Api)
-	h, e := cms.GetHome()
+	var result interface{}
+	switch form.RequestAction {
+	case proxyActionWithHome:
+		result, err = cms.GetHome()
+	case proxyActionWithCategory:
+		result, err = cms.GetCategory()
+	case proxyActionWithDetail:
+		_, result, err = cms.GetDetail(form.Ids[0])
+	case proxyActionWithSearch:
+		result, err = cms.GetSearch(form.Keyword, form.Page)
+	}
 	if err != nil {
-		web.NewError(e)
+		web.NewError(err).Build(ctx)
 		return
 	}
-	web.NewData(h)
+	web.NewData(result).Build(ctx)
 }
