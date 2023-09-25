@@ -52,7 +52,7 @@ func NewMessage(msg string) *JsonResult[any] {
 	}
 }
 
-func NewSuccess[T any](data T) *JsonResult[T] {
+func NewData[T any](data T) *JsonResult[T] {
 	return &JsonResult[T]{
 		Success: true,
 		Message: ActionSuccess,

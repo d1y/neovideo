@@ -26,7 +26,7 @@ func (im *IMacCMSController) create(ctx iris.Context) {
 		web.NewError(err)
 		return
 	}
-	web.NewSuccess[repos.MacCMSRepo](data).Build(ctx)
+	web.NewData[repos.MacCMSRepo](data).Build(ctx)
 }
 
 func (im *IMacCMSController) delete(ctx iris.Context) {
@@ -35,7 +35,7 @@ func (im *IMacCMSController) delete(ctx iris.Context) {
 		web.NewError(err)
 		return
 	}
-	web.NewSuccess(id).SetMessage("删除成功").Build(ctx)
+	web.NewData(id).SetMessage("删除成功").Build(ctx)
 }
 
 func (im *IMacCMSController) batchImport(ctx iris.Context) {

@@ -9,7 +9,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-var cms1 = maccms.NewMacCMS(maccms.MacCMSReponseTypeJSON, "https://ikunzyapi.com/api.php/provide/vod/at/xml")
+var cms1 = maccms.New(maccms.MacCMSReponseTypeJSON, "https://ikunzyapi.com/api.php/provide/vod/at/xml")
 
 func readJSON(file string) []byte {
 	f := filepath.Join("./testdata/json", file+".json")

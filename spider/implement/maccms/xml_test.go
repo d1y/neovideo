@@ -10,7 +10,7 @@ import (
 	"github.com/beevik/etree"
 )
 
-var cms = maccms.NewMacCMS(maccms.MacCMSReponseTypeXML, "https://ikunzyapi.com/api.php/provide/vod/at/xml")
+var cms = maccms.New(maccms.MacCMSReponseTypeXML, "https://ikunzyapi.com/api.php/provide/vod/at/xml")
 
 func readXML(file string) []byte {
 	f := filepath.Join("./testdata/xml", file+".xml")

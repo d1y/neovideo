@@ -10,7 +10,7 @@ type IMacCMS struct {
 	qs           *MaccmsQSBuilder
 }
 
-func NewMacCMS(resType string, api string) *IMacCMS {
+func New(resType string, api string) *IMacCMS {
 	qs := NewMacCMSQSBuilder(resType)
 	return &IMacCMS{
 		ResponseType: resType,

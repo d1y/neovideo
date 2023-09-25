@@ -19,7 +19,7 @@ func (jx *JiexiController) getList(ctx iris.Context) {
 		web.NewError(db.Error).Build(ctx)
 		return
 	}
-	web.NewSuccess(jiexi).Build(ctx)
+	web.NewData(jiexi).Build(ctx)
 }
 
 func (jx *JiexiController) create(ctx iris.Context) {
@@ -33,7 +33,7 @@ func (jx *JiexiController) create(ctx iris.Context) {
 		web.NewError(err).Build(ctx)
 		return
 	}
-	web.NewSuccess(insertData)
+	web.NewData(insertData)
 }
 
 func (jx *JiexiController) delete(ctx iris.Context) {
@@ -43,7 +43,7 @@ func (jx *JiexiController) delete(ctx iris.Context) {
 		web.NewError(err).Build(ctx)
 		return
 	}
-	web.NewSuccess(id).SetMessage("删除成功").Build(ctx)
+	web.NewData(id).SetMessage("删除成功").Build(ctx)
 }
 
 func (jx *JiexiController) list2map(raw []*repos.JiexiRepo) map[string]*repos.JiexiRepo {

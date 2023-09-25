@@ -13,7 +13,7 @@ func TestMaccms(t *testing.T) {
 	if !assert.Equal(t, maccms.GetResponseType(u), maccms.MacCMSReponseTypeXML, "get response type error") {
 		t.FailNow()
 	}
-	var cms1 = maccms.NewMacCMS(maccms.MacCMSReponseTypeXML, u)
+	var cms1 = maccms.New(maccms.MacCMSReponseTypeXML, u)
 	_, err := cms1.GetHome()
 	if err != nil {
 		t.FailNow()
