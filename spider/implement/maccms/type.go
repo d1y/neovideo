@@ -25,30 +25,30 @@ type IMacCMSVideoDDTag struct {
 }
 
 type IMacCMSListVideoItem struct {
-	Last     time.Time `json:"last,omitempty"`
-	Id       int       `json:"id,omitempty"`
-	Tid      int       `json:"tid,omitempty"`
-	Name     string    `json:"name,omitempty"`
-	Type     string    `json:"type,omitempty"`
-	Dt       string    `json:"dt,omitempty"`
-	Note     string    `json:"note,omitempty"`
-	Desc     string    `json:"desc,omitempty"`
-	Lang     string    `json:"lang,omitempty"`
-	Area     string    `json:"area,omitempty"`
-	Year     string    `json:"year,omitempty"`
-	State    string    `json:"state,omitempty"`
-	Actor    string    `json:"actor,omitempty"`
-	Director string    `json:"director,omitempty"`
-	DD       []IMacCMSVideoDDTag
+	Last     time.Time           `json:"last,omitempty"`
+	Id       int                 `json:"id,omitempty"`
+	Tid      int                 `json:"tid,omitempty"`
+	Name     string              `json:"name,omitempty"`
+	Type     string              `json:"type,omitempty"`
+	Dt       string              `json:"dt,omitempty"`
+	Note     string              `json:"note,omitempty"`
+	Desc     string              `json:"desc,omitempty"`
+	Lang     string              `json:"lang,omitempty"`
+	Area     string              `json:"area,omitempty"`
+	Year     string              `json:"year,omitempty"`
+	State    string              `json:"state,omitempty"`
+	Actor    string              `json:"actor,omitempty"`
+	Director string              `json:"director,omitempty"`
+	DD       []IMacCMSVideoDDTag `json:"dd,omitempty"`
 }
 
 type IMacCMSVideosAndHeader struct {
-	ListHeader IMacCMSListAttr
-	Videos     []IMacCMSListVideoItem
+	ListHeader IMacCMSListAttr        `json:"list_header,omitempty"`
+	Videos     []IMacCMSListVideoItem `json:"videos,omitempty"`
 }
 
 type IMacCMSHomeData struct {
-	ListHeader IMacCMSListAttr
-	Category   []IMacCMSCategory
-	Videos     []IMacCMSListVideoItem
+	ListHeader IMacCMSListAttr        `json:"list_header,omitempty"`
+	Category   []IMacCMSCategory      `json:"category,omitempty"`
+	Videos     []IMacCMSListVideoItem `json:"videos,omitempty"`
 }
