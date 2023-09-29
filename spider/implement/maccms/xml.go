@@ -115,7 +115,7 @@ func (m *IMacCMS) xmlParseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSLi
 										break
 									}
 								}
-								d.RawURL = strings.TrimSpace(e.Text())
+								d.Videos = parseDDRawURL(strings.TrimSpace(e.Text()))
 								dd = append(dd, d)
 							}
 						}

@@ -19,9 +19,20 @@ type IMacCMSListAttr struct {
 	RecordCount int `json:"record_count,omitempty"`
 }
 
-type IMacCMSVideoDDTag struct {
+// Deprecated: RawURL need parse, so use IMacCMSVideoDDTag
+type IMacCMSVideoRawDDTag struct {
 	Flag   string `json:"flag,omitempty"`
 	RawURL string `json:"raw_url,omitempty"`
+}
+
+type IMacCMSVideoDDTag struct {
+	Flag   string `json:"flag,omitempty"`
+	Videos []IMacCMSVideoDDTagWithURL
+}
+
+type IMacCMSVideoDDTagWithURL struct {
+	Name string `json:"name,omitempty"`
+	URL  string `json:"url,omitempty"` /* TODO: check url is [m3u8|mp4] */
 }
 
 type IMacCMSListVideoItem struct {
