@@ -59,7 +59,12 @@ func (pc *IMacCMSProxyController) request(ctx iris.Context) {
 	case proxyActionWithCategory:
 		result, err = cms.GetCategory()
 	case proxyActionWithDetail:
-		_, result, err = cms.GetDetail(form.Ids[0])
+		ids := form.GetIDs2Slice()
+		if len(ids) < 1 {
+			web.NewMessage("proxy fetch detail faild(ids)").SetSuccessWithBool(false).Build(ctx)
+			return
+		}
+		_, result, err = cms.GetDetail(ids[0] /* TODO: add multiple id */)
 	case proxyActionWithSearch:
 		result, err = cms.GetSearch(form.Keyword, form.Page)
 	}

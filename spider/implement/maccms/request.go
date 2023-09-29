@@ -1,5 +1,10 @@
 package maccms
 
+import (
+	"strconv"
+	"strings"
+)
+
 type XHRRequest struct {
 	// ResponseType string `json:"r_type" form:"r_type"`
 	RequestAction int    `json:"request_action,omitempty" form:"request_action"`
@@ -8,7 +13,20 @@ type XHRRequest struct {
 	Action        string `json:"action" form:"action"`
 	Category      int    `json:"category" form:"category"`
 	Hour          int    `json:"hour" form:"hour"`
-	Ids           []int  `json:"ids" form:"ids"`
+	Ids           string `json:"ids" form:"ids"`
+}
+
+func (xh *XHRRequest) GetIDs2Slice() []int {
+	var result = make([]int, 0)
+	ids := strings.Split(xh.Ids, ",")
+	for _, id := range ids {
+		id, err := strconv.Atoi(id)
+		if err != nil {
+			continue
+		}
+		result = append(result, id)
+	}
+	return result
 }
 
 // func (xhr *XHRRequest) SetPage(page int) {
