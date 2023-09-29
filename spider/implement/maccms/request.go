@@ -8,6 +8,7 @@ import (
 type XHRRequest struct {
 	// ResponseType string `json:"r_type" form:"r_type"`
 	RequestAction int    `json:"request_action,omitempty" form:"request_action"`
+	ForceFetch    bool   `json:"force_fetch" form:"force_fetch"`
 	Page          int    `json:"page" form:"page"`
 	Keyword       string `json:"keyword" form:"keyword"`
 	Action        string `json:"action" form:"action"`

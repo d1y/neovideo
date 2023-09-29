@@ -81,20 +81,20 @@ func (pc *IMacCMSProxyController) setResult2Cache(err error, k string, val any) 
 	}
 }
 
-func (pc *IMacCMSProxyController) realRequest(data repos.MacCMSRepo, req maccms.XHRRequest, id int) (any, error) {
+func (pc *IMacCMSProxyController) realRequest(data repos.MacCMSRepo, req maccms.XHRRequest, id int, alwayFetch bool) (any, error) {
 	var result any
 	var err error = nil
 	cms := maccms.New(data.RespType, data.Api)
 	switch req.RequestAction {
 	case proxyActionWithHome:
 		k := pc.getHomeCacheID(id)
-		if ok := reUseCache[maccms.IMacCMSHomeData](pc.cc, k, &result); !ok {
+		if ok := reUseCache[maccms.IMacCMSHomeData](pc.cc, k, &result); !ok || alwayFetch {
 			result, err = cms.GetHome()
 			pc.setResult2Cache(err, k, result)
 		}
 	case proxyActionWithCategory:
 		k := pc.getCategoryCacheID(id)
-		if ok := reUseCache[[]maccms.IMacCMSCategory](pc.cc, k, &result); !ok {
+		if ok := reUseCache[[]maccms.IMacCMSCategory](pc.cc, k, &result); !ok || alwayFetch {
 			result, err = cms.GetCategory()
 			pc.setResult2Cache(err, k, result)
 		}
@@ -105,14 +105,14 @@ func (pc *IMacCMSProxyController) realRequest(data repos.MacCMSRepo, req maccms.
 		} else {
 			detailID := ids[0]
 			k := pc.getDetailCacheID(id, detailID)
-			if ok := reUseCache[[]maccms.IMacCMSListVideoItem](pc.cc, k, &result); !ok {
+			if ok := reUseCache[[]maccms.IMacCMSListVideoItem](pc.cc, k, &result); !ok || alwayFetch {
 				_, result, err = cms.GetDetail(detailID /* TODO: add multiple id */)
 				pc.setResult2Cache(err, k, result)
 			}
 		}
 	case proxyActionWithSearch:
 		k := pc.getSearchCacheID(id, req.Keyword)
-		if ok := reUseCache[maccms.IMacCMSVideosAndHeader](pc.cc, k, &result); !ok {
+		if ok := reUseCache[maccms.IMacCMSVideosAndHeader](pc.cc, k, &result); !ok || alwayFetch {
 			result, err = cms.GetSearch(req.Keyword /* FIXME: check keyword is not empty */, req.Page)
 			pc.setResult2Cache(err, k, result)
 		}
@@ -136,7 +136,7 @@ func (pc *IMacCMSProxyController) request(ctx iris.Context) {
 		web.NewError(err).Build(ctx)
 		return
 	}
-	result, err := pc.realRequest(data, form, id)
+	result, err := pc.realRequest(data, form, id, form.ForceFetch)
 	if err != nil {
 		web.NewError(err).Build(ctx)
 		return
