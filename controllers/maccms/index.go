@@ -50,9 +50,9 @@ func (im *IMacCMSController) batchImport(ctx iris.Context) {
 func Register(u iris.Party) {
 	var imc IMacCMSController
 	var px IMacCMSProxyController
-	u.Get("/", imc.getList)
-	u.Post("/", imc.create)
-	u.Post("/batch_import", imc.batchImport)
-	u.Delete("/{id:int}", imc.delete)
+	u.Get("/", imc.getList).Name = "获取苹果CMS列表"
+	u.Post("/", imc.create).Name = "创建苹果CMS"
+	u.Post("/batch_import", imc.batchImport).Name = "批量导入苹果CMS列表"
+	u.Delete("/{id:int}", imc.delete).Name = "删除苹果CMS"
 	u.PartyFunc("/proxy", px.Register)
 }

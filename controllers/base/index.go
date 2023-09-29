@@ -18,5 +18,5 @@ func (c *BaseController) ping(ctx iris.Context) {
 
 func Register(u iris.Party) {
 	var bc BaseController
-	u.Get("/ping", bc.ping)
+	u.Get("/ping", bc.ping).Name = "调试"
 }

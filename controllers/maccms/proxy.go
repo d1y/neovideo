@@ -14,7 +14,7 @@ type IMacCMSProxyController struct {
 
 func (pc *IMacCMSProxyController) Register(u iris.Party) {
 	// pc.cc = cache.New(6*time.Second, 24*time.Second)
-	u.Post("/{id:int}", pc.request)
+	u.Post("/{id:int}", pc.request).Name = "代理访问苹果CMS"
 }
 
 // func (pc *IMacCMSProxyController) getCacheWithID(id int) (repos.MacCMSRepo, bool) {

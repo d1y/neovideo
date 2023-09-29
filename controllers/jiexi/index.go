@@ -100,8 +100,8 @@ func (jx *JiexiController) batchImport(ctx iris.Context) {
 
 func Register(u iris.Party) {
 	var jx JiexiController
-	u.Get("/", jx.getList)
-	u.Post("/", jx.create)
-	u.Delete("/{id:int}", jx.delete)
-	u.Post("/batch_import", jx.batchImport)
+	u.Get("/", jx.getList).Name = "获取解析列表"
+	u.Post("/", jx.create).Name = "创建解析"
+	u.Delete("/{id:int}", jx.delete).Name = "删除解析"
+	u.Post("/batch_import", jx.batchImport).Name = "批量导入解析列表"
 }
