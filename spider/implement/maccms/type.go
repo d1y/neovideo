@@ -26,8 +26,8 @@ type IMacCMSVideoRawDDTag struct {
 }
 
 type IMacCMSVideoDDTag struct {
-	Flag   string `json:"flag,omitempty"`
-	Videos []IMacCMSVideoDDTagWithURL
+	Flag   string                     `json:"flag,omitempty"`
+	Videos []IMacCMSVideoDDTagWithURL `json:"videos,omitempty"`
 }
 
 type IMacCMSVideoDDTagWithURL struct {
