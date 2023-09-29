@@ -6,8 +6,7 @@ import (
 	"fmt"
 
 	"d1y.io/neovideo/config"
-	"d1y.io/neovideo/controllers/base"
-	baseControllers "d1y.io/neovideo/controllers/base"
+	"d1y.io/neovideo/controllers/handler"
 	jiexiControllers "d1y.io/neovideo/controllers/jiexi"
 	maccmsControllers "d1y.io/neovideo/controllers/maccms"
 	"d1y.io/neovideo/sqls"
@@ -48,10 +47,10 @@ func (na *NeovideoApp) GetDB() *sql.DB {
 func (na *NeovideoApp) Register() {
 	na.App.Get("/siteinfo", func(i iris.Context) {
 		routeMeta := na.App.GetRoutesReadOnly()
-		base.RenderSiteInfo(i, routeMeta)
+		handler.Siteinfo(i, routeMeta)
 	})
+	na.App.Get("/ping", handler.Ping)
 	na.App.PartyFunc("/api/v1", func(u iris.Party) {
-		u.PartyFunc("/base", baseControllers.Register)
 		u.PartyFunc("/maccms", maccmsControllers.Register)
 		u.PartyFunc("/jiexi", jiexiControllers.Register)
 	})
