@@ -2,7 +2,7 @@ package maccms
 
 type XHRRequest struct {
 	// ResponseType string `json:"r_type" form:"r_type"`
-	RequestAction int    `json:"request_action,omitempty"`
+	RequestAction int    `json:"request_action,omitempty" form:"request_action"`
 	Page          int    `json:"page" form:"page"`
 	Keyword       string `json:"keyword" form:"keyword"`
 	Action        string `json:"action" form:"action"`
