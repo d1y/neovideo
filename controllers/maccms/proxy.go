@@ -1,39 +1,124 @@
 package maccms
 
 import (
+	"errors"
+	"strconv"
+	"time"
+
 	"d1y.io/neovideo/models/repos"
 	"d1y.io/neovideo/models/web"
+	"d1y.io/neovideo/pkgs/stringbuilder"
 	"d1y.io/neovideo/spider/implement/maccms"
 	"d1y.io/neovideo/sqls"
 	"github.com/kataras/iris/v12"
+	"github.com/patrickmn/go-cache"
 )
 
+const (
+	idSep = "$$"
+)
+
+type sbIDFunc = func(val string) (*stringbuilder.SB, string)
+
+func i2s(i int) string {
+	return strconv.Itoa(i)
+}
+
 type IMacCMSProxyController struct {
-	// cc *cache.Cache
+	cc *cache.Cache
 }
 
 func (pc *IMacCMSProxyController) Register(u iris.Party) {
-	// pc.cc = cache.New(6*time.Second, 24*time.Second)
+	pc.cc = cache.New(42*time.Second, 60*time.Second)
 	u.Post("/{id:int}", pc.request).Name = "代理访问苹果CMS"
 }
 
-// func (pc *IMacCMSProxyController) getCacheWithID(id int) (repos.MacCMSRepo, bool) {
-// 	k := strconv.Itoa(id)
-// 	iface, ok := pc.cc.Get(k)
-// 	if !ok {
-// 		return repos.MacCMSRepo{}, false
-// 	}
-// 	v, ok := iface.(repos.MacCMSRepo)
-// 	if ok {
-// 		return v, true
-// 	}
-// 	return repos.MacCMSRepo{}, false
-// }
+func (pc *IMacCMSProxyController) re2ID(reqAction int) sbIDFunc {
+	sb := stringbuilder.New(12)
+	sb.AppendArray(i2s(reqAction), idSep)
+	fn := func(val string /* TODO: add int type support(string | int) */) (*stringbuilder.SB, string) {
+		sb.AppendArray(val, idSep)
+		return sb, sb.String()
+	}
+	return fn
+}
 
-// func (pc *IMacCMSProxyController) setCacheWithID(id int, data repos.MacCMSRepo) {
-// 	k := strconv.Itoa(id)
-// 	pc.cc.SetDefault(k, data)
-// }
+func (pc *IMacCMSProxyController) getHomeCacheID(id int) (s string) {
+	_, s = pc.re2ID(proxyActionWithHome)(i2s(id))
+	return
+}
+
+func (pc *IMacCMSProxyController) getCategoryCacheID(id int) (s string) {
+	_, s = pc.re2ID(proxyActionWithCategory)(i2s(id))
+	return
+}
+
+func (pc *IMacCMSProxyController) getDetailCacheID(id, detailID int) string {
+	s, _ := pc.re2ID(proxyActionWithDetail)(i2s(id))
+	s.AppendArray(i2s(detailID), idSep)
+	return s.String()
+}
+
+func (pc *IMacCMSProxyController) getSearchCacheID(id int, keyword string /*, page int*/) string {
+	s, _ := pc.re2ID(proxyActionWithSearch)(i2s(id))
+	s.AppendArray(keyword /* FIXME: keyword maybe use $$(idSep), need reclean */, idSep)
+	return s.String()
+}
+
+func reUseCache[T any](cc *cache.Cache, k string, output *any) bool {
+	if val, ok := cc.Get(k); ok {
+		if v, o := val.(maccms.IMacCMSHomeData); o {
+			*output = v
+			return true
+		}
+	}
+	return false
+}
+
+func (pc *IMacCMSProxyController) setResult2Cache(err error, k string, val any) {
+	if err == nil {
+		pc.cc.SetDefault(k, val)
+	}
+}
+
+func (pc *IMacCMSProxyController) realRequest(data repos.MacCMSRepo, req maccms.XHRRequest, id int) (any, error) {
+	var result any
+	var err error = nil
+	cms := maccms.New(data.RespType, data.Api)
+	switch req.RequestAction {
+	case proxyActionWithHome:
+		k := pc.getHomeCacheID(id)
+		if ok := reUseCache[maccms.IMacCMSHomeData](pc.cc, k, &result); !ok {
+			result, err = cms.GetHome()
+			pc.setResult2Cache(err, k, result)
+		}
+	case proxyActionWithCategory:
+		k := pc.getCategoryCacheID(id)
+		if ok := reUseCache[[]maccms.IMacCMSCategory](pc.cc, k, &result); !ok {
+			result, err = cms.GetCategory()
+			pc.setResult2Cache(err, k, result)
+		}
+	case proxyActionWithDetail:
+		ids := req.GetIDs2Slice()
+		if len(ids) < 1 {
+			err = errors.New("proxy fetch detail faild(ids)")
+		} else {
+			detailID := ids[0]
+			k := pc.getDetailCacheID(id, detailID)
+			if ok := reUseCache[[]maccms.IMacCMSListVideoItem](pc.cc, k, &result); !ok {
+				_, result, err = cms.GetDetail(detailID /* TODO: add multiple id */)
+				pc.setResult2Cache(err, k, result)
+			}
+		}
+	case proxyActionWithSearch:
+		k := pc.getSearchCacheID(id, req.Keyword)
+		if ok := reUseCache[maccms.IMacCMSVideosAndHeader](pc.cc, k, &result); !ok {
+			result, err = cms.GetSearch(req.Keyword /* FIXME: check keyword is not empty */, req.Page)
+			pc.setResult2Cache(err, k, result)
+		}
+	}
+	return result, err
+}
 
 func (pc *IMacCMSProxyController) request(ctx iris.Context) {
 	id, err := ctx.Params().GetInt("id")
@@ -51,23 +136,7 @@ func (pc *IMacCMSProxyController) request(ctx iris.Context) {
 		web.NewError(err).Build(ctx)
 		return
 	}
-	cms := maccms.New(data.RespType, data.Api)
-	var result interface{}
-	switch form.RequestAction {
-	case proxyActionWithHome:
-		result, err = cms.GetHome()
-	case proxyActionWithCategory:
-		result, err = cms.GetCategory()
-	case proxyActionWithDetail:
-		ids := form.GetIDs2Slice()
-		if len(ids) < 1 {
-			web.NewMessage("proxy fetch detail faild(ids)").SetSuccessWithBool(false).Build(ctx)
-			return
-		}
-		_, result, err = cms.GetDetail(ids[0] /* TODO: add multiple id */)
-	case proxyActionWithSearch:
-		result, err = cms.GetSearch(form.Keyword, form.Page)
-	}
+	result, err := pc.realRequest(data, form, id)
 	if err != nil {
 		web.NewError(err).Build(ctx)
 		return
