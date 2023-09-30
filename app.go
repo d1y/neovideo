@@ -52,6 +52,8 @@ func (na *NeovideoApp) injectMiddleware() {
 	crs := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // allows everything, use that to change the hosts.
 		AllowCredentials: true,
+		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
 	})
 	na.App.Use(logger.New(logger.DefaultConfig()))
 	na.App.Use(recover.New())
