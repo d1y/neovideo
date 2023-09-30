@@ -10,6 +10,7 @@ import (
 	jiexiControllers "d1y.io/neovideo/controllers/jiexi"
 	maccmsControllers "d1y.io/neovideo/controllers/maccms"
 	"d1y.io/neovideo/sqls"
+	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"gorm.io/gorm"
 )
@@ -44,7 +45,16 @@ func (na *NeovideoApp) GetDB() *sql.DB {
 	return sqls.RealDb()
 }
 
+func (na *NeovideoApp) injectMiddleware() {
+	crs := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // allows everything, use that to change the hosts.
+		AllowCredentials: true,
+	})
+	na.App.UseRouter(crs)
+}
+
 func (na *NeovideoApp) Register() {
+	na.injectMiddleware()
 	na.App.Get("/siteinfo", func(i iris.Context) {
 		routeMeta := na.App.GetRoutesReadOnly()
 		handler.Siteinfo(i, routeMeta)
