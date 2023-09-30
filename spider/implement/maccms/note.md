@@ -21,3 +21,5 @@ https://github.com/YuanHsing/freed/blob/60de9d547b665f96f5939dc7d3d604729d6abff7
 https://github.com/hl2341685/tv/blob/2099305dc03b29c2d742d8aa2f8aa45dbd0ff2ad/TV.txt#L120
 
 https://github.com/LinWei0718/iptvtw/blob/7be378274069a11444ff714a8ade6f4988ecbd99/all.json#L67
+
+https://github.com/vfdeclnc/zy-player-18-resource/tree/main
