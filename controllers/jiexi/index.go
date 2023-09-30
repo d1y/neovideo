@@ -26,7 +26,10 @@ func (jx *JiexiController) getList(ctx iris.Context) {
 
 func (jx *JiexiController) create(ctx iris.Context) {
 	var jiexiForm repos.IJiexi
-	ctx.ReadBody(&jiexiForm)
+	if err := ctx.ReadBody(&jiexiForm); err != nil {
+		web.NewError(err).Build(ctx)
+		return
+	}
 	var insertData = repos.JiexiRepo{
 		IJiexi: jiexiForm,
 	}
