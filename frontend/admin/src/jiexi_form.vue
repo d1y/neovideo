@@ -20,6 +20,7 @@
 import { ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { reactive } from 'vue'
+import { JiexiTable } from '@t/jiexi'
 
 const props = defineProps<Partial<JiexiTable>>()
 

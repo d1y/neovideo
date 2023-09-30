@@ -10,7 +10,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
-    }
+      "@t": resolve(__dirname, "src/types"),
+    },
   },
   server: {
     proxy: {

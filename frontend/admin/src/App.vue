@@ -22,6 +22,7 @@ import { ElMessage, ElMessageBox, type TableInstance } from 'element-plus'
 import * as jiexiApi from '@/api/jiexi'
 import { onMounted } from 'vue'
 import jiexiForm from './jiexi_form.vue'
+import { JiexiTable } from '@t/jiexi'
 import { h } from 'vue'
 
 const tableRef = ref<TableInstance>()
@@ -46,7 +47,7 @@ async function create() {
   })
 }
 
-async function del(idx: int) {
+async function del(idx: number) {
   const item = tableData.value[idx]
   const resp = await jiexiApi.del(item.id!)
   ElMessage({

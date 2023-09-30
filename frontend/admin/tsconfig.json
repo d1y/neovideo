@@ -23,6 +23,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@t/*": ["./src/types/*"],
     },
     "types": [
       "element-plus/global",
