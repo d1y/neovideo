@@ -38,13 +38,55 @@ func (im *IMacCMSController) delete(ctx iris.Context) {
 	web.NewData(id).SetMessage("删除成功").Build(ctx)
 }
 
+func (im *IMacCMSController) queryDBMaccms2Map() (map[string]*repos.MacCMSRepo, error) {
+	dbMaccms, gb := gplus.SelectList[repos.MacCMSRepo](nil)
+	if gb.Error != nil {
+		return nil, gb.Error
+	}
+	var m = make(map[string]*repos.MacCMSRepo)
+	for _, item := range dbMaccms {
+		m[item.Api] = item
+	}
+	return m, nil
+}
+
 func (im *IMacCMSController) batchImport(ctx iris.Context) {
 	importData := ctx.FormValueDefault("data", "")
 	if len(importData) == 0 {
 		web.NewMessage("导入数据为空").SetSuccessWithBool(false).Build(ctx)
 		return
 	}
-	impl.ParseMaccms(importData)
+	m, err := im.queryDBMaccms2Map()
+	if err != nil {
+		web.NewMessage("查询本地数据错误").SetSuccessWithBool(false).Build(ctx)
+		return
+	}
+	var cs []*repos.MacCMSRepo
+	for _, item := range impl.ParseMaccms(importData) {
+		if _, ok := m[item.Api]; ok {
+			continue
+		}
+		cs = append(cs, &repos.MacCMSRepo{
+			IMacCMS: repos.IMacCMS{
+				Api:         item.Api,
+				Name:        item.Name,
+				R18:         item.R18,
+				RespType:    item.RespType,
+				JiexiURL:    item.JiexiURL,
+				JiexiEnable: item.JiexiParse,
+			},
+		})
+	}
+	l := len(cs)
+	if l < 1 {
+		web.NewMessage("数据已经全部导入过 :)").SetSuccessWithBool(false).Build(ctx)
+		return
+	}
+	if err := gplus.InsertBatch[repos.MacCMSRepo](cs).Error; err != nil {
+		web.NewMessage("保存到数据库失败").SetSuccessWithBool(false).Build(ctx)
+		return
+	}
+	web.NewData(l).Build(ctx)
 }
 
 func Register(u iris.Party) {
