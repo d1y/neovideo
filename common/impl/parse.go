@@ -8,6 +8,7 @@ import (
 	"d1y.io/neovideo/common/json"
 	"d1y.io/neovideo/spider/implement/maccms"
 	"github.com/tidwall/gjson"
+	"golang.org/x/exp/slices"
 )
 
 var jiexiURLFuzzyReg = regexp.MustCompile(`(?i)(jiexi|jiexiurl|url)?=`)
@@ -16,6 +17,11 @@ var urlReg = regexp.MustCompile(`https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0
 var jiexiURLAndNoteReg = regexp.MustCompile(`^(\S*:?)\s*(https?://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]=)`)
 var ignoreReg = regexp.MustCompile(`^(//|;)`)
 var symbolReg = regexp.MustCompile(`[,.:：，。]*$`)
+
+var group18 = []string{
+	"18禁",
+	"18+",
+}
 
 func gjsonGGGetString(g gjson.Result, s ...string) (string, error) {
 	for _, v := range s {
@@ -171,7 +177,7 @@ func parseMaccmsWithJSON(raw string) []MacCMSParse {
 				mp.JiexiParse = item.Get("jiexi_parse").Bool()
 				mp.JiexiURL, _ = gjsonGGGetString(item, "jiexi_url")
 				group := item.Get("group").String()
-				if group == "18+" {
+				if slices.Contains(group18, group) {
 					mp.R18 = true
 				} else {
 					mp.R18 = item.Get("nsfw").Bool()

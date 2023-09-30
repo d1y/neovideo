@@ -6,6 +6,7 @@ import (
 	"d1y.io/neovideo/common/impl"
 	"d1y.io/neovideo/models/repos"
 	"d1y.io/neovideo/models/web"
+	"d1y.io/neovideo/pkgs/safeset"
 
 	"github.com/acmestack/gorm-plus/gplus"
 	"github.com/imroc/req/v3"
@@ -79,10 +80,16 @@ func (im *IMacCMSController) batchImport(ctx iris.Context) {
 		return
 	}
 	var cs []*repos.MacCMSRepo
+	ss := safeset.New()
 	for _, item := range impl.ParseMaccms(importData) {
-		if _, ok := m[item.Api]; ok {
+		api := item.Api
+		if _, ok := m[api]; ok {
 			continue
 		}
+		if ss.Contains(api) {
+			continue
+		}
+		ss.Add(api)
 		cs = append(cs, &repos.MacCMSRepo{
 			IMacCMS: repos.IMacCMS{
 				Api:         item.Api,
@@ -91,6 +98,7 @@ func (im *IMacCMSController) batchImport(ctx iris.Context) {
 				RespType:    item.RespType,
 				JiexiURL:    item.JiexiURL,
 				JiexiEnable: item.JiexiParse,
+				Category:    []string{},
 			},
 		})
 	}
