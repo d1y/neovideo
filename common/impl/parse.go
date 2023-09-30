@@ -170,7 +170,12 @@ func parseMaccmsWithJSON(raw string) []MacCMSParse {
 				mp.Api, _ = gjsonGGGetString(item, "api", "url")
 				mp.JiexiParse = item.Get("jiexi_parse").Bool()
 				mp.JiexiURL, _ = gjsonGGGetString(item, "jiexi_url")
-				mp.R18 = item.Get("nsfw").Bool()
+				group := item.Get("group").String()
+				if group == "18+" {
+					mp.R18 = true
+				} else {
+					mp.R18 = item.Get("nsfw").Bool()
+				}
 				rType, _ := gjsonGGGetString(item, "res_type", "type")
 				rType = strings.ToLower(strings.TrimSpace(rType))
 				if len(rType) >= 3 {

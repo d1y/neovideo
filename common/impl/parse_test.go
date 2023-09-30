@@ -37,7 +37,7 @@ func TestParseMaccmsWithJSON(t *testing.T) {
 	if m1.Name != "test" || m1.RespType != maccms.MacCMSReponseTypeXML || !m1.R18 || !m1.JiexiParse {
 		t.FailNow()
 	}
-	if m2.Name != "hh" || m2.Api != "https://hh.h" || m2.R18 {
+	if m2.Name != "hh" || m2.Api != "https://hh.h" || !m2.R18 {
 		t.FailNow()
 	}
 }
