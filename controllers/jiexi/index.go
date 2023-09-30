@@ -38,7 +38,7 @@ func (jx *JiexiController) create(ctx iris.Context) {
 		web.NewError(err).Build(ctx)
 		return
 	}
-	web.NewData(insertData)
+	web.NewData(insertData).Build(ctx)
 }
 
 func (jx *JiexiController) delete(ctx iris.Context) {
