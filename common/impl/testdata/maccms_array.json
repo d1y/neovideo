@@ -1,0 +1,13 @@
+[
+  {
+    "name": "test",
+    "api": "https://x.com/",
+    "jiexi_parse":  true,
+    "nsfw": true,
+    "res_type": "xml"
+  },
+  {
+    "name": "hh",
+    "api": "https://hh.h"
+  }
+]

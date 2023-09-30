@@ -6,15 +6,44 @@ import (
 	"testing"
 
 	"d1y.io/neovideo/common/impl"
+	"d1y.io/neovideo/spider/implement/maccms"
 )
 
-func readJiexi(f string, ext string) string {
+func readFile(f string, ext string) string {
 	b, _ := os.ReadFile(fmt.Sprintf("./testdata/%s.%s", f, ext))
 	return string(b)
 }
 
+func TestParseMaccmsWithLines(t *testing.T) {
+	maccmsArray := impl.ParseMaccms(readFile("maccms1", "txt"))
+	if len(maccmsArray) != 2 {
+		t.FailNow()
+	}
+	m1, m2 := maccmsArray[0], maccmsArray[1]
+	if m1.R18 != true || m1.RespType != maccms.MacCMSReponseTypeXML || m1.Api != "https://x.com" {
+		t.FailNow()
+	}
+	if m2.Name != "低端影视" || m2.Api != "http://v.io/xml" {
+		t.FailNow()
+	}
+}
+
+func TestParseMaccmsWithJSON(t *testing.T) {
+	m := impl.ParseMaccms(readFile("maccms_array", "json"))
+	if len(m) != 2 {
+		t.FailNow()
+	}
+	m1, m2 := m[0], m[1]
+	if m1.Name != "test" || m1.RespType != maccms.MacCMSReponseTypeXML || !m1.R18 || !m1.JiexiParse {
+		t.FailNow()
+	}
+	if m2.Name != "hh" || m2.Api != "https://hh.h" || m2.R18 {
+		t.FailNow()
+	}
+}
+
 func TestParseJiexiJSON(t *testing.T) {
-	jiexiArray := impl.ParseJiexi(readJiexi("jiexi_array", "json"))
+	jiexiArray := impl.ParseJiexi(readFile("jiexi_array", "json"))
 	if len(jiexiArray) != 3 {
 		t.Fail()
 		return
@@ -33,7 +62,7 @@ func TestParseJiexiJSON(t *testing.T) {
 }
 
 func TestParseJiexiText(t *testing.T) {
-	jiexi := impl.ParseJiexi(readJiexi("jiexi1", "txt"))
+	jiexi := impl.ParseJiexi(readFile("jiexi1", "txt"))
 	if len(jiexi) != 7 {
 		t.Log("parse len verification failed")
 		t.FailNow()

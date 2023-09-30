@@ -6,9 +6,10 @@ type JiexiParse struct {
 }
 
 type MacCMSParse struct {
-	Api      string
-	Name     string
-	R18      bool
-	RespType int
-	JiexiURL string
+	Api        string
+	Name       string
+	R18        bool
+	RespType   string
+	JiexiParse bool
+	JiexiURL   string
 }
