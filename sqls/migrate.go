@@ -5,5 +5,7 @@ import (
 )
 
 func AutoMigrate() {
-	db.AutoMigrate(&repos.MacCMSRepo{}, &repos.JiexiRepo{})
+	if err := db.AutoMigrate(&repos.MacCMSRepo{}, &repos.JiexiRepo{}); err != nil {
+		panic(err)
+	}
 }
