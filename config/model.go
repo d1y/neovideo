@@ -9,6 +9,7 @@ type DbConfig struct {
 }
 
 type NeovideoConfig struct {
-	Port int `yaml:"port"`
-	Db   DbConfig
+	Port     int    `yaml:"port"`
+	LogLevel string `yaml:"log_level"`
+	Db       DbConfig
 }

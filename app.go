@@ -12,6 +12,8 @@ import (
 	"d1y.io/neovideo/sqls"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/logger"
+	"github.com/kataras/iris/v12/middleware/recover"
 	"gorm.io/gorm"
 )
 
@@ -31,6 +33,7 @@ func (na *NeovideoApp) Init() {
 	}
 	na.initDB()
 	na.App = iris.New()
+	na.App.Logger().SetLevel(config.Instance.LogLevel)
 	na.Register()
 }
 
@@ -50,6 +53,8 @@ func (na *NeovideoApp) injectMiddleware() {
 		AllowedOrigins:   []string{"*"}, // allows everything, use that to change the hosts.
 		AllowCredentials: true,
 	})
+	na.App.Use(logger.New(logger.DefaultConfig()))
+	na.App.Use(recover.New())
 	na.App.UseRouter(crs)
 }
 
