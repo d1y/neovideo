@@ -22,9 +22,12 @@ type IMacCMSController struct {
 }
 
 func (im *IMacCMSController) getList(ctx iris.Context) {
-	qs := ctx.Request().URL.Query()
-	list, _ := gplus.SelectList[repos.MacCMSRepo](gplus.BuildQuery[repos.MacCMSRepo](qs))
-	ctx.JSON(list)
+	list, gb := gplus.SelectList[repos.MacCMSRepo](nil)
+	if gb.Error != nil {
+		web.NewError(gb.Error)
+		return
+	}
+	web.NewData(list).Build(ctx)
 }
 
 func (im *IMacCMSController) create(ctx iris.Context) {
