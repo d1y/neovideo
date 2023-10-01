@@ -112,7 +112,7 @@ async function create() {
 
 async function del(idx: number) {
   const item = tableData.value[idx]
-  const resp = await jiexiApi.del(item.ID!)
+  const resp = await jiexiApi.del(item.id!)
   ElMessage({
     duration: 1200,
     message: resp.success ? '删除成功' : '删除成功',
