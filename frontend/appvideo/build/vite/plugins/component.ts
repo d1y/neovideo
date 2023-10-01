@@ -2,14 +2,8 @@
  * @name  AutoRegistryComponents
  * @description 按需加载，自动引入组件
  */
-import Components from 'unplugin-vue-components/vite';
-import {
-  ElementPlusResolver,
-  VueUseComponentsResolver,
-  AntDesignVueResolver,
-  TDesignResolver,
-  NaiveUiResolver,
-} from 'unplugin-vue-components/resolvers';
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver, VueUseComponentsResolver, AntDesignVueResolver, TDesignResolver, NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 export const AutoRegistryComponents = () => {
   return Components({
     dirs: ['src/components'],
@@ -32,5 +26,5 @@ export const AutoRegistryComponents = () => {
       }),
       NaiveUiResolver(),
     ],
-  });
-};
+  })
+}

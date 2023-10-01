@@ -1,17 +1,15 @@
 <template>
   <div class="layout-content">
-
-    <img :src="ZhuantiImg" style="width: 100%; height: 200px;"/>
-
+    <img :src="ZhuantiImg" style="width: 100%; height: 200px" />
 
     <h2>热门视频</h2>
 
     <span>简介：本专题是来自本站的所有热门视频集合, 欢迎观看.</span>
 
     <div class="lvideo-list">
-       <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.vodData">
+      <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.vodData">
         <div class="cover-wrap">
-          <img :src="item.vod_pic"/>
+          <img :src="item.vod_pic" />
           <span class="remarks">{{ item.vod_remarks }}</span>
         </div>
         <div class="meta-wrap">
@@ -23,14 +21,12 @@
   </div>
 </template>
 
-<script setup>
-import {getFormatTime} from "/@/utils/index.ts";
-import ZhuantiImg from '/@/assets/images/zhuanti.jpg'
+<script setup lang="ts">
+import { getFormatTime } from '@/utils'
+import ZhuantiImg from '@/assets/images/zhuanti.jpg'
 
-import {listApi} from "/@/api/vod";
-
-const tData = reactive({
-  vodData: []
+const tData = reactive<any>({
+  vodData: [],
 })
 
 const handleDetail = (vod_id) => {
@@ -42,18 +38,18 @@ onMounted(() => {
 })
 const getData = function () {
   const filterDict = {}
-
-  listApi(filterDict).then(res => {
-    console.log(res.data)
-    tData.vodData = res.data
-  }).catch(err => {
-    console.log(err)
-  })
+  // listApi(filterDict)
+  //   .then((res) => {
+  //     console.log(res.data)
+  //     tData.vodData = res.data
+  //   })
+  //   .catch((err) => {
+  //     console.log(err)
+  //   })
 }
 </script>
 
 <style scoped lang="less">
-
 @media screen and (min-width: 1px) and (max-width: 768px) {
   .video-item {
     width: calc((100% - 2 * 16px) / 3) !important;
@@ -68,7 +64,6 @@ const getData = function () {
 .layout-content {
   width: 100%;
   padding: 4px 0px;
-
 
   .lvideo-list {
     min-height: 200px;
@@ -118,12 +113,8 @@ const getData = function () {
         .info {
           display: none;
         }
-
       }
-
     }
   }
-
 }
-
 </style>

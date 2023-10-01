@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import piniaStore from '/@/store/index';
-import { AppState } from './types';
+import { defineStore } from 'pinia'
+import piniaStore from '@/store/index'
+import { AppState } from './types'
 
 export const useAppStore = defineStore(
   // 唯一ID
@@ -14,17 +14,17 @@ export const useAppStore = defineStore(
     getters: {},
     actions: {
       updateSettings(partial: Partial<AppState>) {
-        this.$patch(partial);
+        this.$patch(partial)
       },
 
       // Change theme color
       toggleTheme(dark: boolean) {
         if (dark) {
-          this.theme = 'dark';
-          document.documentElement.classList.add('dark');
+          this.theme = 'dark'
+          document.documentElement.classList.add('dark')
         } else {
-          this.theme = 'light';
-          document.documentElement.classList.remove('dark');
+          this.theme = 'light'
+          document.documentElement.classList.remove('dark')
         }
       },
     },
@@ -34,8 +34,8 @@ export const useAppStore = defineStore(
       paths: ['theme'],
     },
   },
-);
+)
 
 export function useAppOutsideStore() {
-  return useAppStore(piniaStore);
+  return useAppStore(piniaStore)
 }

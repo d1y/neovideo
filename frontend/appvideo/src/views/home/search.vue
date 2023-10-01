@@ -1,11 +1,10 @@
 <template>
   <div class="layout-content">
-
-    <h3>与"{{keyword}}"相关视频：</h3>
+    <h3>与"{{ keyword }}"相关视频：</h3>
     <div class="lvideo-list">
-       <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.vodData">
+      <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.vodData">
         <div class="cover-wrap">
-          <img :src="item.vod_pic"/>
+          <img :src="item.vod_pic" />
           <span class="remarks">{{ item.vod_remarks }}</span>
         </div>
         <div class="meta-wrap">
@@ -16,39 +15,37 @@
     </div>
 
     <div class="page-wrap" v-if="num_pages > 1">
-      <div class="page-item" :class="page === 1? 'disable':''" @click="handlePre()">上页</div>
-      <div class="page-item" :class="page === num_pages? 'disable':''" @click="handleNext()">下页</div>
+      <div class="page-item" :class="page === 1 ? 'disable' : ''" @click="handlePre()">上页</div>
+      <div class="page-item" :class="page === num_pages ? 'disable' : ''" @click="handleNext()">下页</div>
     </div>
   </div>
-
 </template>
-<script setup>
-import {getFormatTime} from "/@/utils/index.ts";
-const route = useRoute();
-
-import {listApi} from "/@/api/vod";
+<script setup lang="ts">
+import { getFormatTime } from '@/utils/index'
+const route = useRoute()
 
 const page = ref(1)
 const num_pages = ref(0)
 
-const tData = reactive({
-  vodData: []
+const tData = reactive<any>({
+  vodData: [],
 })
 
 let keyword = ref('')
 
-
 onMounted(() => {
-
   // 监听地址栏路由
-  watch(() => route.query.keyword, (newText, oldText) => {
-    if (newText !== '') {
-      keyword.value = newText
-      page.value = 1
-      getData()
-    }
-  }, {immediate: true});
-
+  watch(
+    () => route.query.keyword,
+    (newText: string) => {
+      if (newText !== '') {
+        keyword.value = newText
+        page.value = 1
+        getData()
+      }
+    },
+    { immediate: true },
+  )
 })
 
 const getData = function () {
@@ -56,15 +53,17 @@ const getData = function () {
 
   filterDict['keyword'] = keyword.value
   filterDict['page'] = page.value
-  listApi(filterDict).then(res => {
-    console.log(res.data)
-    tData.vodData = res.data
-    // 分页
-    page.value = res.page
-    num_pages.value = res.num_pages
-  }).catch(err => {
-    console.log(err)
-  })
+  // listApi(filterDict)
+  //   .then((res) => {
+  //     console.log(res.data)
+  //     tData.vodData = res.data
+  //     // 分页
+  //     page.value = res.page
+  //     num_pages.value = res.num_pages
+  //   })
+  //   .catch((err) => {
+  //     console.log(err)
+  //   })
 }
 
 const handleDetail = (vod_id) => {
@@ -84,12 +83,9 @@ const handleNext = () => {
     getData()
   }
 }
-
-
 </script>
 
 <style scoped lang="less">
-
 @media screen and (min-width: 1px) and (max-width: 768px) {
   .video-item {
     width: calc((100% - 2 * 16px) / 3) !important;
@@ -100,7 +96,6 @@ const handleNext = () => {
     overflow-x: auto !important;
   }
 }
-
 
 .layout-content {
   width: 100%;
@@ -133,7 +128,6 @@ const handleNext = () => {
         font-size: 0;
         position: relative;
 
-
         .category__list__item {
           display: inline-block;
           margin-right: 40px;
@@ -165,7 +159,6 @@ const handleNext = () => {
       }
     }
   }
-
 
   .lvideo-list {
     min-height: 200px;
@@ -215,9 +208,7 @@ const handleNext = () => {
         .info {
           display: none;
         }
-
       }
-
     }
   }
 
@@ -246,6 +237,5 @@ const handleNext = () => {
       color: grey;
     }
   }
-
 }
 </style>

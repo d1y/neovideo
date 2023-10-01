@@ -1,4 +1,4 @@
-import viteImagemin from 'vite-plugin-imagemin';
+import viteImagemin from 'vite-plugin-imagemin'
 
 export function ConfigImageminPlugin() {
   const plugin = viteImagemin({
@@ -27,6 +27,6 @@ export function ConfigImageminPlugin() {
         },
       ],
     },
-  });
-  return plugin;
+  })
+  return plugin
 }

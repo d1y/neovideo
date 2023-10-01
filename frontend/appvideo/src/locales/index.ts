@@ -24,7 +24,7 @@ function getLangFiles(mList: any, msg: any) {
       if (msg[pathName]) {
         msg[pathName] = {
           ...mList[pathName],
-          ...mList[path].default
+          ...mList[path].default,
         }
       } else {
         msg[pathName] = mList[path].default
@@ -39,7 +39,7 @@ const i18n = createI18n({
   globalInjection: true,
   global: true,
   locale: 'zh-CN', // 语言切换, 中文zh-CN 英文en-US
-  messages: getLangAll()
+  messages: getLangAll(),
 })
 
 export default i18n

@@ -74,7 +74,7 @@
         margin-right: 12px;
       }
       .active {
-        background-color: rgba(0,0,0, 0.04);
+        background-color: rgba(0, 0, 0, 0.04);
         color: #fe3355;
         font-weight: 500;
       }

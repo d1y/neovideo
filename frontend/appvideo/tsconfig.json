@@ -17,14 +17,20 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "experimentalDecorators": true,
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "noImplicitAny": false,
     "skipLibCheck": true,
-    "types": ["vite/client"],
+    "types": [
+      "vite/client"
+    ],
     "removeComments": true,
     "paths": {
-      "/@/*": ["src/*"],
-      "/#/*": ["types/*"]
+      "@/*": [
+        "src/*"
+      ],
     }
   },
   "include": [
@@ -40,5 +46,10 @@
     "mock/**/*.ts",
     "vite.config.ts"
   ],
-  "exclude": ["node_modules", "tests/server/**/*.ts", "dist", "**/*.js"]
+  "exclude": [
+    "node_modules",
+    "tests/server/**/*.ts",
+    "dist",
+    "**/*.js"
+  ]
 }

@@ -1,33 +1,33 @@
-import { UserConfig, ConfigEnv } from 'vite';
-import { createVitePlugins } from './build/vite/plugins';
-import { resolve } from 'path';
-import { VITE_PORT } from './build/constant';
+import { UserConfig, ConfigEnv } from 'vite'
+import { createVitePlugins } from './build/vite/plugins'
+import { resolve } from 'path'
+import { VITE_PORT } from './build/constant'
 
 function pathResolve(dir: string) {
-  return resolve(process.cwd(), '.', dir);
+  return resolve(process.cwd(), '.', dir)
 }
 
 // https://vitejs.dev/config/
 export default ({ command }: ConfigEnv): UserConfig => {
-  const isBuild = command === 'build';
-  let base: string;
+  const isBuild = command === 'build'
+  let base: string
   if (command === 'build') {
-    base = '/';
+    base = '/'
   } else {
-    base = '/';
+    base = '/'
   }
   return {
     base,
-    publicDir: "public", //静态资源服务的文件夹
+    publicDir: 'public', //静态资源服务的文件夹
     resolve: {
       alias: [
         {
           find: 'vue-i18n',
           replacement: 'vue-i18n/dist/vue-i18n.cjs.js',
         },
-        // 别名 /@/xxxx => src/xxxx
+        // 别名 @/xxxx => src/xxxx
         {
-          find: '/@',
+          find: '@/',
           replacement: pathResolve('src') + '/',
         },
       ],
@@ -40,14 +40,15 @@ export default ({ command }: ConfigEnv): UserConfig => {
 
     // server
     server: {
-      hmr: { overlay: false }, // 禁用或配置 HMR 连接 设置 server.hmr.overlay 为 false 可以禁用服务器错误遮罩层
-      // 服务配置
+      hmr: { overlay: true }, // 禁用或配置 HMR 连接 设置 server.hmr.overlay 为 false 可以禁用服务器错误遮罩层
       port: VITE_PORT, // 类型： number 指定服务器端口;
       open: false, // 类型： boolean | string在服务器启动时自动在浏览器中打开应用程序；
       cors: true, // 类型： boolean | CorsOptions 为开发服务器配置 CORS。默认启用并允许任何源
       host: '0.0.0.0', // IP配置，支持从IP启动
       https: false, // 禁用https
-      // proxy,
+      proxy: {
+        '/api': 'http://localhost:3000',
+      },
     },
-  };
-};
+  }
+}

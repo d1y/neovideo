@@ -1,6 +1,5 @@
 <template>
   <div class="layout-content">
-
     <div class="category-layout">
       <!--      <div class="category__line">-->
       <!--        <li class="category__first-ele">类型</li>-->
@@ -14,28 +13,21 @@
       <div class="category__line">
         <li class="category__first-ele">地区</li>
         <ul class="category__list category__sub">
-          <li class="category__list__item category__sub__item" :class="currentArea===item? 'active':''"
-              @click="handleClickArea(item)"
-              v-for="item in categoryData.vodAreaData">{{ item }}
-          </li>
+          <li class="category__list__item category__sub__item" :class="currentArea === item ? 'active' : ''" @click="handleClickArea(item)" v-for="item in categoryData.vodAreaData">{{ item }} </li>
         </ul>
       </div>
       <div class="category__line">
         <li class="category__first-ele">年份</li>
         <ul class="category__list category__sub">
-          <li class="category__list__item category__sub__item" :class="currentYear===item? 'active':''"
-              @click="handleClickYear(item)"
-              v-for="item in categoryData.vodYearData">{{ item }}
-          </li>
+          <li class="category__list__item category__sub__item" :class="currentYear === item ? 'active' : ''" @click="handleClickYear(item)" v-for="item in categoryData.vodYearData">{{ item }} </li>
         </ul>
       </div>
     </div>
 
-
     <div class="lvideo-list">
-       <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.vodData">
+      <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.vodData">
         <div class="cover-wrap">
-          <img :src="item.vod_pic"/>
+          <img :src="item.vod_pic" />
           <span class="remarks">{{ item.vod_remarks }}</span>
         </div>
         <div class="meta-wrap">
@@ -46,16 +38,13 @@
     </div>
 
     <div class="page-wrap" v-if="num_pages > 1">
-      <div class="page-item" :class="page === 1? 'disable':''" @click="handlePre()">上页</div>
-      <div class="page-item" :class="page === num_pages? 'disable':''" @click="handleNext()">下页</div>
+      <div class="page-item" :class="page === 1 ? 'disable' : ''" @click="handlePre()">上页</div>
+      <div class="page-item" :class="page === num_pages ? 'disable' : ''" @click="handleNext()">下页</div>
     </div>
   </div>
-
 </template>
-<script setup>
-import {getFormatTime} from "/@/utils/index.ts";
-
-import {listApi} from "/@/api/vod";
+<script setup lang="ts">
+import { getFormatTime } from '@/utils'
 
 const currentClass = ref('全部')
 const currentArea = ref('全部')
@@ -65,23 +54,20 @@ const page = ref(1)
 const num_pages = ref(0)
 
 const vodClassData = ['全部', '国产', '日剧', '韩剧', '欧美', '港澳', '泰剧', '台剧']
-const vodAreaData = [
-  '全部', '大陆', '香港', '台湾', '日本', '韩国', '西班牙', '英国', '美国', '泰国', '法国',
-]
-const vodYearData = ['全部']
+const vodAreaData = ['全部', '大陆', '香港', '台湾', '日本', '韩国', '西班牙', '英国', '美国', '泰国', '法国']
+const vodYearData: any = ['全部']
 for (let i = 2023; i > 2004; i--) {
   vodYearData.push(i)
 }
 
-
 const categoryData = reactive({
   vodClassData,
   vodAreaData,
-  vodYearData
+  vodYearData,
 })
 
-const tData = reactive({
-  vodData: []
+const tData = reactive<any>({
+  vodData: [],
 })
 
 const handleClickClass = (item) => {
@@ -125,15 +111,17 @@ const getData = function () {
     filterDict['vod_year'] = currentYear.value
   }
   filterDict['page'] = page.value
-  listApi(filterDict).then(res => {
-    console.log(res.data)
-    tData.vodData = res.data
-    // 分页
-    page.value = res.page
-    num_pages.value = res.num_pages
-  }).catch(err => {
-    console.log(err)
-  })
+  // listApi(filterDict)
+  //   .then((res) => {
+  //     console.log(res.data)
+  //     tData.vodData = res.data
+  //     // 分页
+  //     page.value = res.page
+  //     num_pages.value = res.num_pages
+  //   })
+  //   .catch((err) => {
+  //     console.log(err)
+  //   })
 }
 
 const handlePre = () => {
@@ -149,12 +137,9 @@ const handleNext = () => {
     getData()
   }
 }
-
-
 </script>
 
 <style scoped lang="less">
-
 @media screen and (min-width: 1px) and (max-width: 768px) {
   .video-item {
     width: calc((100% - 2 * 16px) / 3) !important;
@@ -165,7 +150,6 @@ const handleNext = () => {
     overflow-x: auto !important;
   }
 }
-
 
 .layout-content {
   width: 100%;
@@ -196,7 +180,6 @@ const handleNext = () => {
       .category__list {
         font-size: 0;
         position: relative;
-
 
         .category__list__item {
           display: inline-block;
@@ -276,9 +259,7 @@ const handleNext = () => {
         .info {
           display: none;
         }
-
       }
-
     }
   }
 
@@ -307,6 +288,5 @@ const handleNext = () => {
       color: grey;
     }
   }
-
 }
 </style>

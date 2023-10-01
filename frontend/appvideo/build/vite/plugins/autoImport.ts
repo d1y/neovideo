@@ -2,7 +2,7 @@
  * @name AutoImportDeps
  * @description 按需加载，自动引入
  */
-import AutoImport from 'unplugin-auto-import/vite';
+import AutoImport from 'unplugin-auto-import/vite'
 // import { AntDesignVueResolver} from 'unplugin-vue-components/resolvers';
 
 export const AutoImportDeps = () => {
@@ -22,5 +22,5 @@ export const AutoImportDeps = () => {
     resolvers: [
       // AntDesignVueResolver(),
     ],
-  });
-};
+  })
+}
