@@ -2,13 +2,12 @@ package jiexi
 
 import (
 	"fmt"
-	"io"
 
 	"d1y.io/neovideo/common/impl"
+	"d1y.io/neovideo/controllers/handler"
 	"d1y.io/neovideo/models/repos"
 	"d1y.io/neovideo/models/web"
 	"github.com/acmestack/gorm-plus/gplus"
-	"github.com/imroc/req/v3"
 	"github.com/kataras/iris/v12"
 )
 
@@ -62,20 +61,10 @@ func (jx *JiexiController) list2map(raw []*repos.JiexiRepo) map[string]*repos.Ji
 }
 
 func (jx *JiexiController) batchImport(ctx iris.Context) {
-	url := ctx.FormValueDefault("url", "")
-	importData := ctx.FormValueDefault("data", "")
-	if len(url) >= 3 && len(importData) == 0 {
-		resp, err := req.Get(url) /* FIXME: verify url */
-		if err != nil {
-			web.NewError(err).Build(ctx)
-			return
-		}
-		b, e := io.ReadAll(resp.Body)
-		if e != nil {
-			web.NewError(e).Build(ctx)
-			return
-		}
-		importData = string(b)
+	importData, err := handler.NewImportDataWithContext(ctx)
+	if err != nil {
+		web.NewError(err).Build(ctx)
+		return
 	}
 	if len(importData) == 0 {
 		web.NewMessage("导入数据为空").SetSuccessWithBool(false).Build(ctx)
@@ -108,7 +97,7 @@ func (jx *JiexiController) batchImport(ctx iris.Context) {
 		web.NewMessage("导入数据为空").SetSuccessWithBool(true).SetData(0).Build(ctx)
 		return
 	}
-	err := gplus.InsertBatch(importJiexi).Error
+	err = gplus.InsertBatch(importJiexi).Error
 	if err != nil {
 		web.NewError(err).Build(ctx)
 		return

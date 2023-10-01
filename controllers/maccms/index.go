@@ -1,12 +1,13 @@
 package maccms
 
 import (
-	"io"
+	"fmt"
 	"sort"
 	"sync"
 	"time"
 
 	"d1y.io/neovideo/common/impl"
+	"d1y.io/neovideo/controllers/handler"
 	"d1y.io/neovideo/models/repos"
 	"d1y.io/neovideo/models/web"
 	"d1y.io/neovideo/pkgs/safeset"
@@ -63,20 +64,10 @@ func (im *IMacCMSController) queryDBMaccms2Map() (map[string]*repos.MacCMSRepo, 
 }
 
 func (im *IMacCMSController) batchImport(ctx iris.Context) {
-	url := ctx.FormValueDefault("url", "")
-	importData := ctx.FormValueDefault("data", "")
-	if len(url) >= 3 && len(importData) == 0 {
-		resp, err := req.Get(url) /* FIXME: verify url */
-		if err != nil {
-			web.NewError(err).Build(ctx)
-			return
-		}
-		b, e := io.ReadAll(resp.Body)
-		if e != nil {
-			web.NewError(e).Build(ctx)
-			return
-		}
-		importData = string(b)
+	importData, err := handler.NewImportDataWithContext(ctx)
+	if err != nil {
+		web.NewError(err).Build(ctx)
+		return
 	}
 	if len(importData) == 0 {
 		web.NewMessage("导入数据为空").SetSuccessWithBool(false).Build(ctx)
@@ -116,10 +107,10 @@ func (im *IMacCMSController) batchImport(ctx iris.Context) {
 		return
 	}
 	if err := gplus.InsertBatch[repos.MacCMSRepo](cs).Error; err != nil {
-		web.NewMessage("保存到数据库失败").SetSuccessWithBool(false).Build(ctx)
+		web.NewError(err).Build(ctx)
 		return
 	}
-	web.NewData(l).Build(ctx)
+	web.NewData(l).SetMessage(fmt.Sprintf("导入成功(%d)", l)).Build(ctx)
 }
 
 func (im *IMacCMSController) checkList(list []*repos.MacCMSRepo) []map[string]any {
