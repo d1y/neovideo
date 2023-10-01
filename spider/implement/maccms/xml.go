@@ -76,6 +76,8 @@ func (m *IMacCMS) xmlParseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSLi
 			if c, ok := child.(*etree.Element); ok {
 				var text = c.Text()
 				switch c.Tag {
+				case "pic":
+					item.Pic = text
 				case "last":
 					item.Last, _ = time.Parse(time.DateTime, text)
 				case "id":

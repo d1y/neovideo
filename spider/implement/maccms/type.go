@@ -49,6 +49,7 @@ type IMacCMSListVideoItem struct {
 	State    string              `json:"state"`
 	Actor    string              `json:"actor"`
 	Director string              `json:"director"`
+	Pic      string              `json:"pic"`
 	DD       []IMacCMSVideoDDTag `json:"dd"`
 }
 
