@@ -94,7 +94,7 @@ func (pc *IMacCMSProxyController) realRequest(data repos.MacCMSRepo, req maccms.
 		}
 	case proxyActionWithCategory:
 		k := pc.getCategoryCacheID(id)
-		if ok := reUseCache[[]maccms.IMacCMSCategory](pc.cc, k, &result); !ok || alwayFetch {
+		if ok := reUseCache[[]repos.IMacCMSCategory](pc.cc, k, &result); !ok || alwayFetch {
 			result, err = cms.GetCategory()
 			pc.setResult2Cache(err, k, result)
 		}

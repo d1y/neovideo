@@ -6,6 +6,7 @@ import (
 	"time"
 
 	typekkkit "d1y.io/neovideo/common/typekit"
+	"d1y.io/neovideo/models/repos"
 	"github.com/imroc/req/v3"
 	"github.com/tidwall/gjson"
 )
@@ -23,7 +24,7 @@ func (m *IMacCMS) gjsonResult2Time(r gjson.Result, key string) time.Time {
 	return t
 }
 
-func (m *IMacCMS) JsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMSListVideoItem, []IMacCMSCategory) {
+func (m *IMacCMS) JsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMSListVideoItem, []repos.IMacCMSCategory) {
 
 	var attr IMacCMSListAttr
 	ints := typekkkit.Int64Slice2Int(result.Get("pagecount").Int(), result.Get("page").Int(), result.Get("total").Int(), result.Get("limit").Int())
@@ -35,7 +36,7 @@ func (m *IMacCMS) JsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMS
 	_class := result.Get("class").Array()
 	_list := result.Get("list").Array()
 
-	var category []IMacCMSCategory
+	var category []repos.IMacCMSCategory
 	var videos []IMacCMSListVideoItem
 
 	for _, item := range _list {
@@ -56,7 +57,7 @@ func (m *IMacCMS) JsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMS
 	for _, item := range _class {
 		id := m.gjsonResult2Int(item, "type_id")
 		name := m.gjsonResult2Str(item, "type_name")
-		category = append(category, IMacCMSCategory{
+		category = append(category, repos.IMacCMSCategory{
 			Text: name,
 			Id:   id,
 		})
@@ -92,14 +93,14 @@ func (m *IMacCMS) JSONGetHome() (IMacCMSHomeData, error) {
 	}, nil
 }
 
-func (m *IMacCMS) JSONGetCategory() ([]IMacCMSCategory, error) {
+func (m *IMacCMS) JSONGetCategory() ([]repos.IMacCMSCategory, error) {
 	res, err := req.Get(m.ApiURL)
 	if err != nil {
-		return []IMacCMSCategory{}, err
+		return []repos.IMacCMSCategory{}, err
 	}
 	result, err := m.response2gjson(res)
 	if err != nil {
-		return []IMacCMSCategory{}, err
+		return []repos.IMacCMSCategory{}, err
 	}
 	_, _, category := m.JsonParseBody(result)
 	return category, nil

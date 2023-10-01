@@ -3,23 +3,31 @@ package maccms
 import (
 	"fmt"
 	"io"
+	"regexp"
 	"sort"
 	"sync"
 	"time"
 
 	"d1y.io/neovideo/common/impl"
-	"d1y.io/neovideo/common/json"
 	"d1y.io/neovideo/controllers/handler"
 	"d1y.io/neovideo/models/repos"
 	"d1y.io/neovideo/models/web"
 	"d1y.io/neovideo/pkgs/safeset"
 	"d1y.io/neovideo/spider/implement/maccms"
 	"d1y.io/neovideo/sqls"
+	"gorm.io/datatypes"
 
 	"github.com/acmestack/gorm-plus/gplus"
+	"github.com/beevik/etree"
 	"github.com/imroc/req/v3"
 	"github.com/kataras/iris/v12"
+	"github.com/tidwall/gjson"
 )
+
+// 域名过期返回html格式(可能不准确)
+//
+// 参考返回值: https://www.77zy.vip/inc/m3u8.php
+var malwaredomainlistHTMLRegexp = regexp.MustCompile(`^<!doctype html>[\s\S]*data-adblockkey[\s\S]*>window\.park =`)
 
 type IMacCMSController struct {
 	sm sync.Mutex
@@ -100,7 +108,6 @@ func (im *IMacCMSController) batchImport(ctx iris.Context) {
 				RespType:    item.RespType,
 				JiexiURL:    item.JiexiURL,
 				JiexiEnable: item.JiexiParse,
-				Category:    []string{},
 			},
 		})
 	}
@@ -124,26 +131,57 @@ func (im *IMacCMSController) checkList(list []*repos.MacCMSRepo) []map[string]an
 		go func(i *repos.MacCMSRepo) {
 			defer wg.Done()
 			resp, err := req.C().SetTimeout(4 * time.Second).R().Get(i.Api)
+			sfu := true
+			if err == nil {
+				sfu = resp.StatusCode == iris.StatusOK // 状态只要不是200就是错误!
+			}
 			m := map[string]any{
 				"id":   i.ID,
 				"name": i.Name,
+				"api":  i.Api,
 			}
-			m["successful"] = true
+			m["successful"] = sfu
 			m["type"] = "unknown"
-			if err != nil {
-				m["message"] = err.Error()
+			if err != nil || !sfu {
+				if err != nil {
+					m["message"] = err.Error()
+				} else {
+					m["message"] = "response status is not 200!"
+				}
 				m["successful"] = false
 			} else {
 				b, e := io.ReadAll(resp.Body)
-				if e != nil {
-					m["message"] = e.Error()
+				s := string(b)
+				if e != nil || malwaredomainlistHTMLRegexp.MatchString(s) {
+					if e != nil {
+						m["message"] = e.Error()
+					} else {
+						m["message"] = "response parse fail(domain expired)"
+					}
 					m["successful"] = false
 				} else {
-					if json.VerifyStringIsJSON(string(b)) {
-						m["type"] = maccms.MacCMSReponseTypeJSON
+					rt := maccms.GetResponseType(s)
+					av := maccms.NewWithApi(i.Api)
+					if rt.IsJSON() {
+						if gjson.Valid(s) {
+							gp := gjson.Parse(s)
+							_, _, categorys := av.JsonParseBody(gp)
+							if len(categorys) >= 1 {
+								m["category"] = datatypes.NewJSONSlice(categorys)
+							}
+						}
 					} else {
-						m["type"] = maccms.MacCMSReponseTypeXML
+						doc := etree.NewDocument()
+						if err := doc.ReadFromString(s); err == nil {
+							root := doc.Root()
+							if root != nil {
+								if categorys := av.XMLGetCategoryWithEtreeRoot(root); len(categorys) >= 1 {
+									m["category"] = datatypes.NewJSONSlice(categorys)
+								}
+							}
+						}
 					}
+					m["type"] = string(rt)
 					m["message"] = "请求成功"
 				}
 			}
@@ -205,6 +243,11 @@ func (im *IMacCMSController) checkAndSync(ctx iris.Context) {
 		} else if resType == maccms.MacCMSReponseTypeXML {
 			cols["resp_type"] = maccms.MacCMSReponseTypeXML
 		}
+		if c, ok := item["category"]; ok {
+			if j, o := c.(datatypes.JSONSlice[repos.IMacCMSCategory]); o {
+				cols["category"] = j
+			}
+		}
 		if err := sqls.DB().Model(&repos.MacCMSRepo{}).Where("id = ?", id).Updates(cols).Error; err != nil {
 			errs = append(errs, map[string]any{
 				"id":    id,
@@ -212,7 +255,7 @@ func (im *IMacCMSController) checkAndSync(ctx iris.Context) {
 			})
 		}
 	}
-	web.NewData(errs).Build(ctx)
+	web.NewData(errs).SetMessage("同步成功").Build(ctx)
 }
 
 func (im *IMacCMSController) removeUnavailable(ctx iris.Context) {

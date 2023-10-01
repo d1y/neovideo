@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"d1y.io/neovideo/models/repos"
 	"d1y.io/neovideo/spider/implement/maccms"
 	"github.com/beevik/etree"
 )
@@ -25,13 +26,13 @@ func readXML2ETree(file string) *etree.Element {
 	return homeXML.Root()
 }
 
-func findIdByCategory(raw []maccms.IMacCMSCategory, id int) (maccms.IMacCMSCategory, error) {
+func findIdByCategory(raw []repos.IMacCMSCategory, id int) (repos.IMacCMSCategory, error) {
 	for i := 0; i < len(raw); i++ {
 		if raw[i].Id == id {
 			return raw[i], nil
 		}
 	}
-	return maccms.IMacCMSCategory{}, errors.New("not found")
+	return repos.IMacCMSCategory{}, errors.New("not found")
 }
 
 func TestXMLHomeResponse(t *testing.T) {

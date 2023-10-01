@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"d1y.io/neovideo/models/repos"
 	"github.com/beevik/etree"
 	"github.com/imroc/req/v3"
 )
@@ -21,8 +22,8 @@ func (m *IMacCMS) xmlIsListTagWithXMLElement(e *etree.Element) bool {
 	return m.xmlIsWhichTagWithXMLElement(e, "list")
 }
 
-func (m *IMacCMS) xmlParseClassGetCategory(doc *etree.Element) []IMacCMSCategory {
-	var category []IMacCMSCategory
+func (m *IMacCMS) xmlParseClassGetCategory(doc *etree.Element) []repos.IMacCMSCategory {
+	var category []repos.IMacCMSCategory
 	for _, tr := range doc.Child {
 		if t, ok := tr.(*etree.Element); ok {
 			var text = t.Text()
@@ -38,7 +39,7 @@ func (m *IMacCMS) xmlParseClassGetCategory(doc *etree.Element) []IMacCMSCategory
 					continue
 				}
 			}
-			category = append(category, IMacCMSCategory{
+			category = append(category, repos.IMacCMSCategory{
 				Text: text,
 				Id:   id,
 			})
@@ -175,7 +176,7 @@ func (m *IMacCMS) XMLGetHomeWithEtreeRoot(root *etree.Element) (IMacCMSHomeData,
 	return data, nil
 }
 
-func (m *IMacCMS) XMLGetCategoryWithEtreeRoot(root *etree.Element) []IMacCMSCategory {
+func (m *IMacCMS) XMLGetCategoryWithEtreeRoot(root *etree.Element) []repos.IMacCMSCategory {
 	for _, child := range root.Child {
 		if c, ok := child.(*etree.Element); ok {
 			if m.xmlIsClassTagWithXMLElement(c) {
@@ -183,7 +184,7 @@ func (m *IMacCMS) XMLGetCategoryWithEtreeRoot(root *etree.Element) []IMacCMSCate
 			}
 		}
 	}
-	return []IMacCMSCategory{}
+	return []repos.IMacCMSCategory{}
 }
 
 func (m *IMacCMS) XMLGetSearchWithEtreeRoot(root *etree.Element) (IMacCMSVideosAndHeader, error) {
@@ -223,10 +224,10 @@ func (m *IMacCMS) XMLGetHome() (IMacCMSHomeData, error) {
 	return m.XMLGetHomeWithEtreeRoot(root)
 }
 
-func (m *IMacCMS) XMLGetCategory() ([]IMacCMSCategory, error) {
+func (m *IMacCMS) XMLGetCategory() ([]repos.IMacCMSCategory, error) {
 	root, err := m.xmlGetURL2XMLDocumentWithRoot(m.ApiURL)
 	if err != nil {
-		return []IMacCMSCategory{}, err
+		return []repos.IMacCMSCategory{}, err
 	}
 	return m.XMLGetCategoryWithEtreeRoot(root), nil
 }

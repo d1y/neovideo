@@ -1,16 +1,15 @@
 package maccms
 
-import "time"
+import (
+	"time"
+
+	"d1y.io/neovideo/models/repos"
+)
 
 const (
 	MacCMSReponseTypeXML  = "XML"
 	MacCMSReponseTypeJSON = "JSON"
 )
-
-type IMacCMSCategory struct {
-	Text string `json:"text"`
-	Id   int    `json:"id"`
-}
 
 type IMacCMSListAttr struct {
 	Page        int `json:"page"`
@@ -59,7 +58,7 @@ type IMacCMSVideosAndHeader struct {
 }
 
 type IMacCMSHomeData struct {
-	ListHeader IMacCMSListAttr        `json:"list_header"`
-	Category   []IMacCMSCategory      `json:"category"`
-	Videos     []IMacCMSListVideoItem `json:"videos"`
+	ListHeader IMacCMSListAttr         `json:"list_header"`
+	Category   []repos.IMacCMSCategory `json:"category"`
+	Videos     []IMacCMSListVideoItem  `json:"videos"`
 }

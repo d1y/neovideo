@@ -2,12 +2,26 @@ package maccms
 
 import (
 	"d1y.io/neovideo/common/json"
+	"d1y.io/neovideo/models/repos"
 )
 
 type IMacCMS struct {
 	ResponseType string `json:"response_type"`
 	ApiURL       string `json:"api_url"`
 	qs           *MaccmsQSBuilder
+}
+
+type respType string
+
+func (rt respType) IsJSON() bool {
+	return rt == MacCMSReponseTypeJSON
+}
+func (rt respType) IsXML() bool {
+	return rt == MacCMSReponseTypeXML
+}
+
+func NewWithApi(api string) *IMacCMS {
+	return New("", api)
 }
 
 func New(resType string, api string) *IMacCMS {
@@ -19,10 +33,26 @@ func New(resType string, api string) *IMacCMS {
 	}
 }
 
+func (m *IMacCMS) SetReponseType(t string) {
+	m.ResponseType = t
+}
+
+func (m *IMacCMS) SetJSONResponseType() {
+	m.SetReponseType(MacCMSReponseTypeJSON)
+}
+
+func (m *IMacCMS) SetXMLReponseType() {
+	m.SetReponseType(MacCMSReponseTypeXML)
+}
+
+func GetResponseTypeWithByte(b []byte) respType {
+	return GetResponseType(string(b))
+}
+
 // json: [MacCMSReponseTypeJSON]
 //
 // xml: [MacCMSReponseTypeXML]
-func GetResponseType(raw string) string {
+func GetResponseType(raw string) respType {
 	if json.VerifyStringIsJSON(raw) {
 		return MacCMSReponseTypeJSON
 	}
@@ -39,7 +69,7 @@ func (m *IMacCMS) GetHome() (IMacCMSHomeData, error) {
 	return m.XMLGetHome()
 }
 
-func (m *IMacCMS) GetCategory() ([]IMacCMSCategory, error) {
+func (m *IMacCMS) GetCategory() ([]repos.IMacCMSCategory, error) {
 	if m.ResponseType == MacCMSReponseTypeJSON {
 		return m.JSONGetCategory()
 	}
