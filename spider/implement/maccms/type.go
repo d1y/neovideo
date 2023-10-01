@@ -8,58 +8,58 @@ const (
 )
 
 type IMacCMSCategory struct {
-	Text string `json:"text,omitempty"`
-	Id   int    `json:"id,omitempty"`
+	Text string `json:"text"`
+	Id   int    `json:"id"`
 }
 
 type IMacCMSListAttr struct {
-	Page        int `json:"page,omitempty"`
-	PageCount   int `json:"page_count,omitempty"`
-	PageSize    int `json:"page_size,omitempty"`
-	RecordCount int `json:"record_count,omitempty"`
+	Page        int `json:"page"`
+	PageCount   int `json:"page_count"`
+	PageSize    int `json:"page_size"`
+	RecordCount int `json:"record_count"`
 }
 
 // Deprecated: RawURL need parse, so use IMacCMSVideoDDTag
 type IMacCMSVideoRawDDTag struct {
-	Flag   string `json:"flag,omitempty"`
-	RawURL string `json:"raw_url,omitempty"`
+	Flag   string `json:"flag"`
+	RawURL string `json:"raw_url"`
 }
 
 type IMacCMSVideoDDTag struct {
-	Flag   string                     `json:"flag,omitempty"`
-	Videos []IMacCMSVideoDDTagWithURL `json:"videos,omitempty"`
+	Flag   string                     `json:"flag"`
+	Videos []IMacCMSVideoDDTagWithURL `json:"videos"`
 }
 
 type IMacCMSVideoDDTagWithURL struct {
-	Name string `json:"name,omitempty"`
-	URL  string `json:"url,omitempty"` /* TODO: check url is [m3u8|mp4] */
+	Name string `json:"name"`
+	URL  string `json:"url"` /* TODO: check url is [m3u8|mp4] */
 }
 
 type IMacCMSListVideoItem struct {
-	Last     time.Time           `json:"last,omitempty"`
-	Id       int                 `json:"id,omitempty"`
-	Tid      int                 `json:"tid,omitempty"`
-	Name     string              `json:"name,omitempty"`
-	Type     string              `json:"type,omitempty"`
-	Dt       string              `json:"dt,omitempty"`
-	Note     string              `json:"note,omitempty"`
-	Desc     string              `json:"desc,omitempty"`
-	Lang     string              `json:"lang,omitempty"`
-	Area     string              `json:"area,omitempty"`
-	Year     string              `json:"year,omitempty"`
-	State    string              `json:"state,omitempty"`
-	Actor    string              `json:"actor,omitempty"`
-	Director string              `json:"director,omitempty"`
-	DD       []IMacCMSVideoDDTag `json:"dd,omitempty"`
+	Last     time.Time           `json:"last"`
+	Id       int                 `json:"id"`
+	Tid      int                 `json:"tid"`
+	Name     string              `json:"name"`
+	Type     string              `json:"type"`
+	Dt       string              `json:"dt"`
+	Note     string              `json:"note"`
+	Desc     string              `json:"desc"`
+	Lang     string              `json:"lang"`
+	Area     string              `json:"area"`
+	Year     string              `json:"year"`
+	State    string              `json:"state"`
+	Actor    string              `json:"actor"`
+	Director string              `json:"director"`
+	DD       []IMacCMSVideoDDTag `json:"dd"`
 }
 
 type IMacCMSVideosAndHeader struct {
-	ListHeader IMacCMSListAttr        `json:"list_header,omitempty"`
-	Videos     []IMacCMSListVideoItem `json:"videos,omitempty"`
+	ListHeader IMacCMSListAttr        `json:"list_header"`
+	Videos     []IMacCMSListVideoItem `json:"videos"`
 }
 
 type IMacCMSHomeData struct {
-	ListHeader IMacCMSListAttr        `json:"list_header,omitempty"`
-	Category   []IMacCMSCategory      `json:"category,omitempty"`
-	Videos     []IMacCMSListVideoItem `json:"videos,omitempty"`
+	ListHeader IMacCMSListAttr        `json:"list_header"`
+	Category   []IMacCMSCategory      `json:"category"`
+	Videos     []IMacCMSListVideoItem `json:"videos"`
 }

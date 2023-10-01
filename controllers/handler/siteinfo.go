@@ -6,12 +6,12 @@ import (
 )
 
 type routeMeta struct {
-	Name string `json:"name,omitempty"`
-	Path string `json:"path,omitempty"`
+	Name string `json:"name"`
+	Path string `json:"path"`
 }
 
 type siteInfo struct {
-	Route []routeMeta `json:"route_meta,omitempty"`
+	Route []routeMeta `json:"route_meta"`
 }
 
 func Siteinfo(p iris.Context, meta []context.RouteReadOnly) {

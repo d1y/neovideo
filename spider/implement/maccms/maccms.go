@@ -5,8 +5,8 @@ import (
 )
 
 type IMacCMS struct {
-	ResponseType string `json:"response_type,omitempty"`
-	ApiURL       string `json:"api_url,omitempty"`
+	ResponseType string `json:"response_type"`
+	ApiURL       string `json:"api_url"`
 	qs           *MaccmsQSBuilder
 }
 
