@@ -11,7 +11,7 @@ import (
 
 func NewImportFormWithContext(ctx iris.Context) (*typekit.ImportDataForm, error) {
 	var form typekit.ImportDataForm
-	if err := ctx.ReadForm(&form); err != nil {
+	if err := ctx.ReadBody(&form); err != nil {
 		return nil, err
 	}
 	return &form, nil
