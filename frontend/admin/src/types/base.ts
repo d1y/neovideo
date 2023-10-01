@@ -1,7 +1,7 @@
 export interface DbBaseModel {
-  create_at: string
-  update_at: string
-  id: number
+  UpdatedAt: string
+  CreatedAt: string
+  ID: number
 }
 
 export type NullableDbBaseModel = Partial<DbBaseModel>

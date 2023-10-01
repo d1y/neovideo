@@ -1,18 +1,14 @@
 <template>
   <el-form :model="ruleForm" :rules="rules" ref="formRef" label-width="100px" style="max-width: 460px">
-    <el-form-item label="线路名称">
+    <el-form-item prop="name" label="线路名称">
       <el-input v-model="ruleForm.name" />
     </el-form-item>
-    <el-form-item label="线路链接">
+    <el-form-item prop="url" label="线路链接">
       <el-input v-model="ruleForm.url" />
     </el-form-item>
-    <el-form-item label="说明">
+    <el-form-item prop="note" label="说明">
       <el-input v-model="ruleForm.note" />
     </el-form-item>
-    <div class="flex justify-center items-center">
-      <el-button>取消</el-button>
-      <el-button @click="confirm">确定</el-button>
-    </div>
   </el-form>
 </template>
 
@@ -26,24 +22,24 @@ const props = defineProps<Partial<JiexiTable>>()
 
 const formRef = ref<FormInstance>()
 
-const ruleForm = reactive(props)
-
-const rules = reactive<FormRules<typeof ruleForm>>({
-  name: [
-    {
-      required: true,
-    }
-  ],
-  url: [
-    {
-      required: true,
-    }
-  ],
+const ruleForm = reactive<JiexiTable>({
+  name: props.name || "",
+  url: props.url || "",
+  note: props.note || "",
 })
 
-async function confirm() {
-  const isNext = await formRef.value?.validate()
-  debugger
-}
+const rules = reactive<FormRules<typeof ruleForm>>({
+  name: [ { required: true, message: 'name is required', trigger: 'blur' } ],
+  url: [ { required: true, message: 'url is required', trigger: 'blur' } ],
+})
+
+defineExpose({
+  async validate() {
+    return await formRef.value?.validate()
+  },
+  getForm() {
+    return ruleForm
+  }
+})
 
 </script>
