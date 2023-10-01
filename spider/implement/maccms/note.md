@@ -23,3 +23,8 @@ https://github.com/hl2341685/tv/blob/2099305dc03b29c2d742d8aa2f8aa45dbd0ff2ad/TV
 https://github.com/LinWei0718/iptvtw/blob/7be378274069a11444ff714a8ade6f4988ecbd99/all.json#L67
 
 https://github.com/vfdeclnc/zy-player-18-resource/tree/main
+
+https://raw.githubusercontent.com/hl2341685/tv/2099305dc03b29c2d742d8aa2f8aa45dbd0ff2ad/zy.json
+https://raw.githubusercontent.com/hl2341685/tv/2099305dc03b29c2d742d8aa2f8aa45dbd0ff2ad/zy2.json
+https://github.com/hl2341685/tv/raw/2099305dc03b29c2d742d8aa2f8aa45dbd0ff2ad/xhr.json
+https://github.com/search?type=code&q=B%E7%AB%99%E8%A7%A3%E6%9E%902
