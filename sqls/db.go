@@ -6,6 +6,7 @@ import (
 
 	"d1y.io/neovideo/config"
 	gplus "github.com/acmestack/gorm-plus/gplus"
+	"github.com/go-gorm/caches/v2"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -38,6 +39,12 @@ func Open(dbConfig config.DbConfig, config *gorm.Config /*, models ...interface{
 		log.Errorf("opens database failed: %s", err.Error())
 		return
 	}
+
+	// https://github.com/go-gorm/caches
+	cachesPlugin := &caches.Caches{Conf: &caches.Config{
+		Easer: true,
+	}}
+	db.Use(cachesPlugin)
 
 	if sqlDB, err = db.DB(); err == nil {
 		sqlDB.SetMaxIdleConns(dbConfig.MaxIdleConns)
