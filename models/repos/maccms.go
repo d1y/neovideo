@@ -23,3 +23,7 @@ type MacCMSRepo struct {
 	gorm.Model
 	IMacCMS
 }
+
+func (m *MacCMSRepo) TableName() string {
+	return "t_maccms"
+}

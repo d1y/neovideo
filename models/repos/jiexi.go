@@ -12,3 +12,7 @@ type JiexiRepo struct {
 	gorm.Model
 	IJiexi
 }
+
+func (j *JiexiRepo) TableName() string {
+	return "t_jiexi"
+}
