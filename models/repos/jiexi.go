@@ -1,6 +1,6 @@
 package repos
 
-import "gorm.io/gorm"
+import "d1y.io/neovideo/models"
 
 type IJiexi struct {
 	Name string `json:"name,omitempty" gorm:"name" form:"name"`
@@ -9,7 +9,7 @@ type IJiexi struct {
 }
 
 type JiexiRepo struct {
-	gorm.Model
+	models.BaseRepo
 	IJiexi
 }
 

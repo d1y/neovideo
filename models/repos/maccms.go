@@ -3,8 +3,8 @@ package repos
 import (
 	"time"
 
+	"d1y.io/neovideo/models"
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 type IMacCMS struct {
@@ -20,7 +20,7 @@ type IMacCMS struct {
 }
 
 type MacCMSRepo struct {
-	gorm.Model
+	models.BaseRepo
 	IMacCMS
 }
 
