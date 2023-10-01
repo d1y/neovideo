@@ -2,15 +2,18 @@ package maccms
 
 import (
 	"fmt"
+	"io"
 	"sort"
 	"sync"
 	"time"
 
 	"d1y.io/neovideo/common/impl"
+	"d1y.io/neovideo/common/json"
 	"d1y.io/neovideo/controllers/handler"
 	"d1y.io/neovideo/models/repos"
 	"d1y.io/neovideo/models/web"
 	"d1y.io/neovideo/pkgs/safeset"
+	"d1y.io/neovideo/spider/implement/maccms"
 	"d1y.io/neovideo/sqls"
 
 	"github.com/acmestack/gorm-plus/gplus"
@@ -120,17 +123,29 @@ func (im *IMacCMSController) checkList(list []*repos.MacCMSRepo) []map[string]an
 	for _, item := range list {
 		go func(i *repos.MacCMSRepo) {
 			defer wg.Done()
-			_, err := req.C().SetTimeout(4 * time.Second).R().Get(i.Api)
+			resp, err := req.C().SetTimeout(4 * time.Second).R().Get(i.Api)
 			m := map[string]any{
 				"id":   i.ID,
 				"name": i.Name,
 			}
 			m["successful"] = true
+			m["type"] = "unknown"
 			if err != nil {
 				m["message"] = err.Error()
 				m["successful"] = false
 			} else {
-				m["message"] = "请求成功"
+				b, e := io.ReadAll(resp.Body)
+				if e != nil {
+					m["message"] = e.Error()
+					m["successful"] = false
+				} else {
+					if json.VerifyStringIsJSON(string(b)) {
+						m["type"] = maccms.MacCMSReponseTypeJSON
+					} else {
+						m["type"] = maccms.MacCMSReponseTypeXML
+					}
+					m["message"] = "请求成功"
+				}
 			}
 			mm = append(mm, m)
 		}(item)
@@ -180,9 +195,15 @@ func (im *IMacCMSController) checkAndSync(ctx iris.Context) {
 			continue
 		}
 		successful := item["successful"].(bool)
+		resType := item["type"].(string)
 		cols := map[string]any{
 			"last_check": now,
 			"available":  successful,
+		}
+		if resType == maccms.MacCMSReponseTypeJSON {
+			cols["resp_type"] = maccms.MacCMSReponseTypeJSON
+		} else if resType == maccms.MacCMSReponseTypeXML {
+			cols["resp_type"] = maccms.MacCMSReponseTypeXML
 		}
 		if err := sqls.DB().Model(&repos.MacCMSRepo{}).Where("id = ?", id).Updates(cols).Error; err != nil {
 			errs = append(errs, map[string]any{
