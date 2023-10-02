@@ -9,134 +9,72 @@
       <div class="right">
         <h3>{{ $t('Pages.playUrl') }}</h3>
         <div class="p-list">
-          <div class="p-item" :class="currentLink === item.link ? 'active' : ''" v-for="item in tData.playData" @click="startPlay(item.link)">{{ item.label }} </div>
+          <div
+            class="p-item"
+            :class="{
+              active: true,
+            }"
+            v-for="item in vodData?.dd"
+            @click="startPlay(item.videos[0].url)"
+          >
+            {{ item.flag }}
+          </div>
         </div>
       </div>
     </div>
 
     <div class="content-wrap">
       <div class="meta-wrap">
-        <h1 class="title">{{ tData.detailData.vod_name }}</h1>
+        <h1 class="title">{{ vodData?.name }}</h1>
         <div class="category"
-          >{{ tData.detailData.vod_class }} / {{ tData.detailData.vod_area }} /
-          {{ tData.detailData.vod_year }}
+          >{{ vodData?.lang }} / {{ vodData?.area }} /
+          {{ vodData?.year }}
         </div>
         <div class="info-wrap">
-          <img :src="tData.detailData.vod_pic" />
+          <img v-lazy="vodData?.pic" />
           <div class="info">
-            <div class="info-item">{{ $t('Pages.director') }}: {{ tData.detailData.vod_director }}</div>
-            <div class="info-item">{{ $t('Pages.actors') }}: {{ tData.detailData.vod_actor }}</div>
-            <div class="info-item">
-              <div v-html="tData.detailData.brief"></div>
-            </div>
+            <div v-if="vodData?.director" class="info-item">{{ $t('Pages.director') }}: {{ vodData?.director }}</div>
+            <div v-if="vodData?.actor" class="info-item">{{ $t('Pages.actors') }}: {{ vodData?.actor }}</div>
           </div>
         </div>
       </div>
       <h3 style="height: 40px; border-bottom: 1px solid rgba(0, 0, 0, 0.04)">内容详情</h3>
-      <div v-html="tData.detailData.vod_content"></div>
-
-      <h3 style="height: 40px; border-bottom: 1px solid rgba(0, 0, 0, 0.04)">为你推荐</h3>
-      <div class="lvideo-list">
-        <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.recommendData">
-          <div class="cover-wrap">
-            <img :src="item.vod_pic" />
-            <span class="remarks">{{ item.vod_remarks }}</span>
-          </div>
-          <div class="meta-wrap">
-            <div class="title">{{ item.vod_name }}</div>
-            <div class="info">{{ getFormatTime(item.vod_time, false) }}更新</div>
-          </div>
-        </a>
-      </div>
+      <div v-if="vodData?.desc" v-html="vodData?.desc"></div>
+      <div v-else>暂无内容简介</div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { getFormatTime } from '@/utils'
+import { getDetail } from '@/api/maccms'
+import { DataVideo } from '@/api/types'
 import Header from '@/views/components/header.vue'
 
 import TCPlayer from 'tcplayer.js'
 import 'tcplayer.js/dist/tcplayer.min.css'
 
-const router = useRouter()
-const route = useRoute()
+const props = defineProps<{
+  id: string
+  mid: string
+}>()
 
-let id = 0
+const currentLink = ref('')
 
-let currentLink = ref('')
-
-const tData = reactive<any>({
-  detailData: {},
-  playData: [],
-  recommendData: [],
-})
+const vodData = ref<DataVideo>()
 
 let player: any = undefined
 onMounted(() => {
-  id = route.params.id as unknown as number
-  console.log(id)
-
   player = TCPlayer('player-box', {})
   getData()
 })
 
 const startPlay = (link) => {
   currentLink.value = link
-  console.log('最新播放==>', link)
   player.src(currentLink.value)
 }
 
-const getData = function () {
-  const filterDict = {}
-  filterDict['vod_id'] = id
-  // detailApi(filterDict)
-  //   .then((res) => {
-  //     tData.detailData = res.data
-  //     tData.detailData.brief = '简介：' + tData.detailData.vod_content.substring(0, 100) + '...'
-  //     tData.detailData.description = tData.detailData.vod_content
-  //     // 设置seo词汇
-  //     setSEO()
-  //     // 剥离播放地址
-  //     let playData = []
-  //     let vodPlayUrl = tData.detailData.vod_play_url
-  //     let vodPlayList = vodPlayUrl.split('$$$')
-  //     vodPlayList.forEach((item) => {
-  //       let playItem = item.split('$')
-  //       let label = playItem[0]
-  //       let link = playItem[1]
-  //       if (link.endsWith('.m3u8')) {
-  //         playData.push({
-  //           label: label,
-  //           link: link,
-  //         })
-  //       }
-  //     })
-  //     tData.playData = playData
-  //     // 默认播首个
-  //     currentLink.value = tData.playData[0].link
-  //     startPlay(currentLink.value)
-  //     // 获取推荐
-  //     getRecommendData()
-  //   })
-  //   .catch((err) => {
-  //     console.log(err)
-  //   })
-}
-
-const getRecommendData = function () {
-  // recommendApi({
-  //   vod_class: tData.detailData.vod_class,
-  // })
-  //   .then((res) => {
-  //     tData.recommendData = res.data
-  //   })
-  //   .catch((err) => {
-  //     console.log(err)
-  //   })
-}
-
-const handleDetail = (vod_id) => {
-  return '/detail/' + vod_id
+const getData = async function () {
+  const data = await getDetail(props.mid, props.id)
+  vodData.value = data
 }
 </script>
 <style scoped lang="less">

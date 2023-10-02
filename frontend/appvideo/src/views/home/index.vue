@@ -7,7 +7,7 @@
       </div>
 
       <div class="lvideo-list">
-        <a class="video-item" :href="handleDetail(subItem.id)" v-for="subItem in item.data.videos">
+        <a class="video-item" :href="handleDetail(subItem.id, item.id)" v-for="subItem in item.data.videos">
           <div class="cover-wrap">
             <img v-lazy="subItem.pic" />
             <span class="remarks">{{ subItem.desc }}</span>
@@ -24,15 +24,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { VodItem, getHome } from '@/api/vod'
+import { getHome } from '@/api/vod'
+import { VodItem } from '@/api/types'
 const data = ref<VodItem[]>()
 const getData = async function () {
   const d = await getHome()
   data.value = d
 }
 onMounted(getData)
-const handleDetail = (vod_id: string | number) => {
-  return '/detail/' + vod_id
+const handleDetail = (vod_id: number, mid: number) => {
+  return `/detail/${vod_id}?mid=${mid}`
 }
 </script>
 

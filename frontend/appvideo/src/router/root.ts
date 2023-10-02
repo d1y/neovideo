@@ -1,5 +1,7 @@
+import { RouteRecordRaw } from 'vue-router'
+
 // 路由表
-const constantRouterMap = [
+const constantRouterMap: RouteRecordRaw[] = [
   // ************* 前台路由 **************
   {
     path: '/',
@@ -48,6 +50,10 @@ const constantRouterMap = [
     path: '/detail/:id',
     name: 'detail',
     component: () => import('@/views/detail.vue'),
+    props: (route) => ({
+      id: route.params.id,
+      mid: route.query.mid as string,
+    })
   },
 ]
 
