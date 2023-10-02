@@ -13,3 +13,7 @@ type NeovideoConfig struct {
 	LogLevel string `yaml:"log_level"`
 	Db       DbConfig
 }
+
+func (nd *NeovideoConfig) IsDev() bool {
+	return nd.LogLevel == "debug"
+}

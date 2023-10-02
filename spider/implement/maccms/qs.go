@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"d1y.io/neovideo/spider/axios"
 	"github.com/imroc/req/v3"
 )
 
@@ -83,8 +84,18 @@ func (b *MaccmsQSBuilder) wrapperRequestHeader(r *req.Request) *req.Request {
 	return r
 }
 
+// 该方法没有包装缓存机制, 不要使用
+// Deprecated: use BuildGetRequest/BuildPostRequest
 func (b *MaccmsQSBuilder) BuildRequest() *req.Request {
-	return b.wrapperRequestHeader(req.R().SetQueryParams(b.Build()))
+	return b.wrapperRequestHeader(axios.Request().SetQueryParams(b.Build()))
+}
+
+func (b *MaccmsQSBuilder) BuildGetRequest(api string) ([]byte, error) {
+	return axios.Get(api, b.Build())
+}
+
+func (b *MaccmsQSBuilder) BuildPostRequest(api string) ([]byte, error) {
+	return axios.Post(api, b.Build())
 }
 
 func (b *MaccmsQSBuilder) String() (string, error) {

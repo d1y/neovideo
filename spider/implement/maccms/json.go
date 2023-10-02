@@ -2,12 +2,11 @@ package maccms
 
 import (
 	"errors"
-	"io"
 	"time"
 
 	typekkkit "d1y.io/neovideo/common/typekit"
 	"d1y.io/neovideo/models/repos"
-	"github.com/imroc/req/v3"
+	"d1y.io/neovideo/spider/axios"
 	"github.com/tidwall/gjson"
 )
 
@@ -65,11 +64,7 @@ func (m *IMacCMS) JsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMS
 	return attr, videos, category
 }
 
-func (m *IMacCMS) response2gjson(res *req.Response) (gjson.Result, error) {
-	buf, err := io.ReadAll(res.Body)
-	if err != nil {
-		return gjson.Result{}, err
-	}
+func (m *IMacCMS) byte2gjson(buf []byte) (gjson.Result, error) {
 	if !gjson.ValidBytes(buf) {
 		return gjson.Result{}, errors.New("invalid json")
 	}
@@ -77,11 +72,11 @@ func (m *IMacCMS) response2gjson(res *req.Response) (gjson.Result, error) {
 }
 
 func (m *IMacCMS) JSONGetHome() (IMacCMSHomeData, error) {
-	res, err := req.Get(m.ApiURL)
+	res, err := axios.Get(m.ApiURL)
 	if err != nil {
 		return IMacCMSHomeData{}, err
 	}
-	result, err := m.response2gjson(res)
+	result, err := m.byte2gjson(res)
 	if err != nil {
 		return IMacCMSHomeData{}, err
 	}
@@ -94,11 +89,11 @@ func (m *IMacCMS) JSONGetHome() (IMacCMSHomeData, error) {
 }
 
 func (m *IMacCMS) JSONGetCategory() ([]repos.IMacCMSCategory, error) {
-	res, err := req.Get(m.ApiURL)
+	res, err := axios.Get(m.ApiURL)
 	if err != nil {
 		return []repos.IMacCMSCategory{}, err
 	}
-	result, err := m.response2gjson(res)
+	result, err := m.byte2gjson(res)
 	if err != nil {
 		return []repos.IMacCMSCategory{}, err
 	}
@@ -107,11 +102,11 @@ func (m *IMacCMS) JSONGetCategory() ([]repos.IMacCMSCategory, error) {
 }
 
 func (m *IMacCMS) JSONGetSearch(keyword string, page int) (IMacCMSVideosAndHeader, error) {
-	res, err := m.qs.SetKeyword(keyword).SetPage(page).BuildRequest().Get(m.ApiURL)
+	res, err := m.qs.SetKeyword(keyword).SetPage(page).BuildGetRequest(m.ApiURL)
 	if err != nil {
 		return IMacCMSVideosAndHeader{}, err
 	}
-	result, err := m.response2gjson(res)
+	result, err := m.byte2gjson(res)
 	if err != nil {
 		return IMacCMSVideosAndHeader{}, err
 	}
@@ -123,11 +118,11 @@ func (m *IMacCMS) JSONGetSearch(keyword string, page int) (IMacCMSVideosAndHeade
 }
 
 func (m *IMacCMS) JSONGetDetail(id int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
-	res, err := m.qs.SetDetailAction().SetIDS(id).BuildRequest().Get(m.ApiURL)
+	res, err := m.qs.SetDetailAction().SetIDS(id).BuildGetRequest(m.ApiURL)
 	if err != nil {
 		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
 	}
-	result, err := m.response2gjson(res)
+	result, err := m.byte2gjson(res)
 	if err != nil {
 		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
 	}

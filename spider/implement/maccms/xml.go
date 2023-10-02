@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"d1y.io/neovideo/models/repos"
+	"d1y.io/neovideo/spider/axios"
 	"github.com/beevik/etree"
-	"github.com/imroc/req/v3"
 )
 
 func (m *IMacCMS) xmlIsWhichTagWithXMLElement(e *etree.Element, tag string) bool {
@@ -49,12 +49,12 @@ func (m *IMacCMS) xmlParseClassGetCategory(doc *etree.Element) []repos.IMacCMSCa
 }
 
 func (m *IMacCMS) xmlGetURL2XMLDocument(url string) (*etree.Document, error) {
-	res, err := req.Get(url)
+	res, err := axios.Get(url)
 	if err != nil {
 		return nil, err
 	}
 	doc := etree.NewDocument()
-	doc.ReadFrom(res.Body)
+	doc.ReadFromBytes(res)
 	return doc, nil
 }
 
@@ -238,21 +238,21 @@ func (m *IMacCMS) XMLGetCategory() ([]repos.IMacCMSCategory, error) {
 }
 
 func (m *IMacCMS) XMLGetSearch(keyword string, page int) (IMacCMSVideosAndHeader, error) {
-	res, err := m.qs.SetPage(page).SetKeyword(keyword).BuildRequest().Post(m.ApiURL)
+	res, err := m.qs.SetPage(page).SetKeyword(keyword).BuildPostRequest(m.ApiURL)
 	if err != nil {
 		return IMacCMSVideosAndHeader{}, err
 	}
 	doc := etree.NewDocument()
-	doc.ReadFrom(res.Body)
+	doc.ReadFromBytes(res)
 	return m.XMLGetSearchWithEtreeRoot(doc.Root())
 }
 
 func (m *IMacCMS) XMLGetDetail(id int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
-	res, err := m.qs.SetAction("videolist").SetIDS(id).BuildRequest().Get(m.ApiURL)
+	res, err := m.qs.SetAction("videolist").SetIDS(id).BuildPostRequest(m.ApiURL)
 	if err != nil {
 		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
 	}
 	doc := etree.NewDocument()
-	doc.ReadFrom(res.Body)
+	doc.ReadFromBytes(res)
 	return m.XMLGetDetailWithEtreeRoot(doc.Root())
 }
