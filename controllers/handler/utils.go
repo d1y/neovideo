@@ -38,3 +38,8 @@ func NewImportDataWithContext(ctx iris.Context) (string, error) {
 	}
 	return data, nil
 }
+
+func NewIDWithContext(ctx iris.Context) (string, bool) {
+	id := ctx.Params().Get("id")
+	return id, len(id) >= 1
+}
