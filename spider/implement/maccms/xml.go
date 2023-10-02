@@ -159,6 +159,9 @@ func (m *IMacCMS) xmlParseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSLi
 
 func (m *IMacCMS) XMLGetHomeWithEtreeRoot(root *etree.Element) (IMacCMSHomeData, error) {
 	var data IMacCMSHomeData
+	if root == nil {
+		return data, errors.New("root is nil")
+	}
 	for _, child := range root.Child {
 		if c, ok := child.(*etree.Element); ok {
 			if m.xmlIsClassTagWithXMLElement(c) {
