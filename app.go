@@ -67,7 +67,9 @@ func (na *NeovideoApp) Register() {
 		routeMeta := na.App.GetRoutesReadOnly()
 		handler.Siteinfo(i, routeMeta)
 	})
-	na.App.Get("/ping", handler.Ping)
+	na.App.Get("/health", func(ctx iris.Context) {
+		ctx.Text("ok")
+	})
 	na.App.PartyFunc("/api/v1", func(u iris.Party) {
 		u.PartyFunc("/maccms", maccmsControllers.Register)
 		u.PartyFunc("/jiexi", jiexiControllers.Register)
