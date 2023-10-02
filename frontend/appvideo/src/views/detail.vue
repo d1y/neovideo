@@ -62,9 +62,15 @@ const currentLink = ref('')
 const vodData = ref<DataVideo>()
 
 let player: any = undefined
-onMounted(() => {
+onMounted(async () => {
   player = TCPlayer('player-box', {})
-  getData()
+  await getData()
+  if (!!vodData.value && vodData.value.dd && vodData.value.dd.length >= 1) {
+    const vs = vodData.value.dd[0].videos
+    if (!!vs.length) {
+      startPlay(vs[0].url)
+    }
+  }
 })
 
 const startPlay = (link) => {
