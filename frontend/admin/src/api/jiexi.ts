@@ -10,10 +10,10 @@ export async function create(data: Partial<JiexiTable>) {
   return (await http.post<ApiResult<JiexiTable>>("/jiexi", data)).data
 }
 
-export async function del(id: number){
+export async function del(id: number) {
   return (await http.delete<ApiResult<number>>(`/jiexi/${id}`)).data
 }
 
 export async function batchImport(data: string) {
-  return (await http.post<ApiResult<number>>("/jiexi/batch_import", {data})).data
+  return (await http.post<ApiResult<number>>("/jiexi/batch_import", { data })).data
 }

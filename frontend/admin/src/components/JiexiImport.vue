@@ -3,17 +3,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from "vue";
 
 const props = defineProps<{
-  data: string,
-}>()
+  data: string;
+}>();
 
-const val = ref(props.data)
+const val = ref(props.data);
 
 defineExpose({
   getValue() {
-    return val.value
-  }
-})
+    return val.value;
+  },
+});
 </script>
