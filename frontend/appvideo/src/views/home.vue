@@ -11,10 +11,6 @@
 import Header from '@/views/components/header.vue'
 import Footer from '@/views/components/footer.vue'
 import Menu from '@/views/components/menu.vue'
-
-const getData = function () {}
-const data = reactive(['', '', '', '', '', '', '', ''])
-onMounted(getData)
 </script>
 
 <style scoped lang="less">

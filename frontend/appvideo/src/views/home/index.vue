@@ -1,73 +1,38 @@
 <template>
   <div>
-    <div class="header">
-      <h3>最新电影</h3>
-      <a class="more" href="/dianying">更多</a>
-    </div>
+    <template v-for="item in data">
+      <div class="header">
+        <h3>{{ item.name }}</h3>
+        <a class="more">更多</a>
+      </div>
 
-    <div class="lvideo-list">
-      <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.dianying">
-        <div class="cover-wrap">
-          <img :src="item.vod_pic" />
-          <span class="remarks">{{ item.vod_remarks }}</span>
-        </div>
-        <div class="meta-wrap">
-          <div class="title">{{ item.vod_name }}</div>
-          <div class="info">{{ getFormatTime(item.vod_time, false) }}更新</div>
-        </div>
-      </a>
-    </div>
-
-    <div class="header">
-      <h3>最新电视剧</h3>
-      <a class="more" href="/dianshiju">更多</a>
-    </div>
-
-    <div class="lvideo-list">
-      <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.dianshiju">
-        <div class="cover-wrap">
-          <img :src="item.vod_pic" />
-          <span class="remarks">{{ item.vod_remarks }}</span>
-        </div>
-        <div class="meta-wrap">
-          <div class="title">{{ item.vod_name }}</div>
-          <div class="info">{{ getFormatTime(item.vod_time, false) }}更新</div>
-        </div>
-      </a>
-    </div>
+      <div class="lvideo-list">
+        <a class="video-item" :href="handleDetail(subItem.id)" v-for="subItem in item.data.videos">
+          <div class="cover-wrap">
+            <img v-lazy="subItem.pic" />
+            <span class="remarks">{{ subItem.desc }}</span>
+          </div>
+          <div class="meta-wrap">
+            <div class="title">{{ subItem.name }}</div>
+            <div class="info">{{ subItem.last }}更新</div>
+          </div>
+        </a>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getFormatTime } from '@/utils'
-
-const tData = reactive<any>({
-  dianying: [],
-  dianshiju: [],
-  zongyi: [],
-  dongman: [],
-})
-
-onMounted(() => {
-  getData()
-})
-
-const handleDetail = (vod_id) => {
-  return '/detail/' + vod_id
+import { ref } from 'vue'
+import { VodItem, getHome } from '@/api/vod'
+const data = ref<VodItem[]>()
+const getData = async function () {
+  const d = await getHome()
+  data.value = d
 }
-
-const getData = function () {
-  // homeApi({})
-  //   .then((res) => {
-  //     console.log(res.data)
-  //     tData.dianying = res.data.dianying
-  //     tData.dianshiju = res.data.dianshiju
-  //     tData.zongyi = res.data.zongyi
-  //     tData.dongman = res.data.dongman
-  //   })
-  //   .catch((err) => {
-  //     console.log(err)
-  //   })
+onMounted(getData)
+const handleDetail = (vod_id: string | number) => {
+  return '/detail/' + vod_id
 }
 </script>
 
