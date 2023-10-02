@@ -18,7 +18,7 @@
       <el-table-column prop="api" label="api" width="420" />
       <el-table-column label="操作" width="320">
         <template #default="scope">
-          <el-button>检测可用性</el-button>
+          <el-button @click="checkOnceUnavailable(scope.row.id)">检测可用性</el-button>
           <el-button>修改</el-button>
           <el-button @click="del(scope.$index)">删除</el-button>
         </template>
@@ -55,6 +55,15 @@ async function checkAndSync() {
   ElMessage({
     type: 'success',
     message: "同步成功"
+  })
+  await getData()
+}
+
+async function checkOnceUnavailable(id: number) {
+  const { successful } = await maccmsApi.checkOnceStatus(id)
+  ElMessage({
+    type: successful ? 'success' : 'error',
+    message: successful ? '该源可用:)' : '该源不可用 :(',
   })
   await getData()
 }

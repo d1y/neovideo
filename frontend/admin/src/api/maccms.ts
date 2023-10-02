@@ -29,3 +29,10 @@ export async function allcheckAndSync() {
 export async function removeUnavailable() {
   return (await http.delete<ApiResult<MacCMSRepo[]>>("/maccms/allcheck/unavailable")).data.data
 }
+
+export async function checkOnceStatus(id: number) {
+  return (await http.post<ApiResult<{
+    successful: boolean
+    message: string
+  }>>(`/maccms/check/${id}`)).data.data
+}
