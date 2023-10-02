@@ -87,11 +87,17 @@ func (vc *IVodController) queryAndCMSFetchHome() ([]homeItem, error) {
 			data = append(data, im)
 		}(item)
 	}
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].ID < data[j].ID
-	})
 	wg.Wait()
-	return data, nil
+	var result = make([]homeItem, 0)
+	for _, item := range data {
+		if item.Error == "" {
+			result = append(result, item)
+		}
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].ID < result[j].ID
+	})
+	return result, nil
 }
 
 func (vc *IVodController) renderHome(ctx iris.Context) {
