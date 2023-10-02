@@ -18,3 +18,14 @@ export async function del(id: number) {
 export async function batchImport(data: string) {
   return (await http.post<ApiResult<number>>("/maccms/batch_import", { data })).data
 }
+
+export async function allcheckAndSync() {
+  return (await http.post<ApiResult<{
+    id: number
+    error: string
+  }[]>>("/maccms/allcheck/sync")).data.data
+}
+
+export async function removeUnavailable() {
+  return (await http.delete<ApiResult<MacCMSRepo[]>>("/maccms/allcheck/unavailable")).data.data
+}

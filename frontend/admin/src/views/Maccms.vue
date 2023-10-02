@@ -1,8 +1,10 @@
 <template>
   <div class="p-5">
     <el-button-group>
-      <el-button class="pl-2" @click="create">创建线路</el-button>
+      <el-button @click="create">创建线路</el-button>
       <el-button @click="createBybatchImport">批量导入</el-button>
+      <el-button @click="checkAndSync">一键检测并同步所有可用性</el-button>
+      <el-button @click="rmUnavailable">一键删除所有不可用</el-button>
     </el-button-group>
     <el-table ref="tableRef" :data="tableData">
       <el-table-column label="可用" width="60">
@@ -27,7 +29,7 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import { ElMessage, ElMessageBox, type TableInstance } from "element-plus";
+import { ElMessage, type TableInstance } from "element-plus";
 import * as maccmsApi from "@/api/maccms";
 import { onMounted } from "vue";
 import { MacCMSRepo } from "@/types/maccms";
@@ -41,10 +43,29 @@ async function getData() {
   tableData.value = resp.data;
 }
 
+
 async function createBybatchImport() {
 }
 
 async function create() {
+}
+
+async function checkAndSync() {
+  await maccmsApi.allcheckAndSync()
+  ElMessage({
+    type: 'success',
+    message: "同步成功"
+  })
+  await getData()
+}
+
+async function rmUnavailable() {
+  const rms = (await maccmsApi.removeUnavailable()) || []
+  ElMessage({
+    type: rms.length == 0 ? 'error' : 'success',
+    message: rms.length == 0 ? "删除失败(全部可用)" : `删除成功(共${rms.length})`
+  }) 
+  await getData()
 }
 
 async function del(idx: number) {
