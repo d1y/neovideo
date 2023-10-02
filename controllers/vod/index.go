@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	homeCCKey = "$home"
+	homeRepoQueryKey = "$home"
+	homeRenderKey    = "$hrender"
 )
 
 type homeItem struct {
@@ -41,7 +42,7 @@ func (vc *IVodController) queryRawCMS() ([]repos.MacCMSRepo, error) {
 	vc.sm.Lock()
 	defer vc.sm.Unlock()
 	var result []repos.MacCMSRepo
-	if val, ok := vc.cc.Get(homeCCKey); ok {
+	if val, ok := vc.cc.Get(homeRepoQueryKey); ok {
 		if v, o := val.([]repos.MacCMSRepo); o {
 			result = v
 		}
@@ -53,7 +54,7 @@ func (vc *IVodController) queryRawCMS() ([]repos.MacCMSRepo, error) {
 		for _, item := range cms {
 			result = append(result, *item)
 		}
-		vc.cc.SetDefault(homeCCKey, result)
+		vc.cc.SetDefault(homeRepoQueryKey, result)
 	}
 	return result, nil
 }
@@ -94,12 +95,21 @@ func (vc *IVodController) queryAndCMSFetchHome() ([]homeItem, error) {
 }
 
 func (vc *IVodController) renderHome(ctx iris.Context) {
-	ims, err := vc.queryAndCMSFetchHome()
-	if err != nil {
-		web.NewError(err).Build(ctx)
-		return
+	var result []homeItem
+	if val, ok := vc.cc.Get(homeRenderKey); ok {
+		if v, o := val.([]homeItem); o {
+			result = v
+		}
+	} else {
+		ims, err := vc.queryAndCMSFetchHome()
+		if err != nil {
+			web.NewError(err).Build(ctx)
+			return
+		}
+		vc.cc.SetDefault(homeRenderKey, ims)
+		result = ims
 	}
-	web.NewData(ims).Build(ctx)
+	web.NewData(result).Build(ctx)
 }
 
 func Register(u iris.Party) {
