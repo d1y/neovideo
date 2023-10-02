@@ -50,7 +50,7 @@ func (im *IMacCMSController) create(ctx iris.Context) {
 		web.NewError(err)
 		return
 	}
-	web.NewData[repos.MacCMSRepo](data).Build(ctx)
+	web.NewData[repos.MacCMSRepo](data).SetMessage("创建成功").Build(ctx)
 }
 
 func (im *IMacCMSController) delete(ctx iris.Context) {
