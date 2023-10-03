@@ -8,18 +8,17 @@
       </div>
       <div class="right">
         <h3>{{ $t('Pages.playUrl') }}</h3>
-        <div class="p-list">
-          <div
-            class="p-item"
-            :class="{
-              active: true,
-            }"
-            v-for="item in vodData?.dd"
-            @click="startPlay(item.videos[0].url)"
-          >
-            {{ item.flag }}
+        <template v-for="item in (vodData?.dd || [])">
+          <div class="p-list">
+            <div class="p-item" :class="{ active: currentPlayFlag == item.flag }">{{ item.flag }}</div>
           </div>
-        </div>
+          <div style="margin: 12px; width: 100%;height: 2px; background-color: rgba(0,0,0,.1);"></div>
+          <div class="p-list">
+            <div class="p-item" :class="{ active: i.url == currentLink }" v-for="i in item.videos" @click="startPlay(i.url)">
+              {{ i.name }}
+            </div>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -58,6 +57,7 @@ const props = defineProps<{
 }>()
 
 const currentLink = ref('')
+const currentPlayFlag = ref('')
 
 const vodData = ref<DataVideo>()
 
@@ -66,9 +66,10 @@ onMounted(async () => {
   player = TCPlayer('player-box', {})
   await getData()
   if (!!vodData.value && vodData.value.dd && vodData.value.dd.length >= 1) {
-    const vs = vodData.value.dd[0].videos
-    if (!!vs.length) {
-      startPlay(vs[0].url)
+    const item = vodData.value.dd[0]
+    if (!!item.videos.length) {
+      currentPlayFlag.value = item.flag
+      startPlay(item.videos[0].url)
     }
   }
 })
