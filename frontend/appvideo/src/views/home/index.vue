@@ -37,7 +37,7 @@ const getData = async function () {
   data.value = vodhome
 }
 onMounted(getData)
-const handleDetail = (vod_id: number, mid: number) => {
+const handleDetail = (vod_id: number, mid: number | string) => {
   return `/detail/${vod_id}?mid=${mid}`
 }
 </script>

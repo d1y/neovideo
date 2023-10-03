@@ -1,23 +1,42 @@
 <template>
   <div class="menu-wrap">
     <div class="category__list">
-      <div class="category__list__item" :class="currentMenu === item.id ? 'active' : ''" v-for="item in menuData">{{ item.label }} </div>
+      <div class="category__list__item" :class="currentMenu === item.id ? 'active' : ''" v-for="item in menuData" @click="hdlClick(item.id)">{{ item.label }} </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import useVods from '@/store/modules/useVods'
+import { useRouter } from 'vue-router'
 
-const currentMenu = ref('index')
-const { menus }= storeToRefs(useVods())
+const router = useRouter()
 
-const menuData = computed(()=> {
+const { setCurrentCategory } = useVods()
+const { menus, currentCategory: currentMenu }= storeToRefs(useVods())
+
+const menuData = computed<{label: string, id: number}[]>(()=> {
   return [
-  { label: '首页', id: 'index' },
+  { label: '首页', id: -1 },
     ...menus.value,
   ]
 })
+
+function hdlClick(id: number | number) {
+  setCurrentCategory(id)
+  if (id == -1) {
+    router.replace({
+      path: '/index',
+    })
+    return
+  }
+  router.push({
+    path: '/dianying',
+    query: {
+      id,
+    }
+  })
+}
 </script>
 
 <style scoped lang="less">

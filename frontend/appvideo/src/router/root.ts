@@ -23,26 +23,14 @@ const constantRouterMap: RouteRecordRaw[] = [
         path: 'dianying',
         name: 'dianying',
         component: () => import('@/views/home/dianying.vue'),
-      },
-      {
-        path: 'dianshiju',
-        name: 'dianshiju',
-        component: () => import('@/views/home/dianshiju.vue'),
-      },
-      {
-        path: 'zongyi',
-        name: 'zongyi',
-        component: () => import('@/views/home/zongyi.vue'),
-      },
-      {
-        path: 'dongman',
-        name: 'dongman',
-        component: () => import('@/views/home/dongman.vue'),
+        props: (route) => ({
+          id: route.query.id,
+        }),
       },
       {
         path: 'zhuanti',
         name: 'zhuanti',
-        component: () => import('@/views/home/zhuanti.vue'),
+        component: () => import('@/views/home/zhuanti.vue')
       },
     ],
   },

@@ -2,136 +2,94 @@
   <div class="layout-content">
     <div class="category-layout">
       <div class="category__line">
-        <li class="category__first-ele">类型</li>
+        <li class="category__first-ele">分类:</li>
         <ul class="category__list category__sub">
-          <li class="category__list__item category__sub__item" :class="currentClass === item ? 'active' : ''" @click="handleClickClass(item)" v-for="item in categoryData.vodClassData">{{ item }} </li>
-        </ul>
-      </div>
-      <div class="category__line">
-        <li class="category__first-ele">地区</li>
-        <ul class="category__list category__sub">
-          <li class="category__list__item category__sub__item" :class="currentArea === item ? 'active' : ''" @click="handleClickArea(item)" v-for="item in categoryData.vodAreaData">{{ item }} </li>
-        </ul>
-      </div>
-      <div class="category__line">
-        <li class="category__first-ele">年份</li>
-        <ul class="category__list category__sub">
-          <li class="category__list__item category__sub__item" :class="currentYear === item ? 'active' : ''" @click="handleClickYear(item)" v-for="item in categoryData.vodYearData">{{ item }} </li>
+          <li class="category__list__item category__sub__item" :class="{
+            active: currentCategory?.id == item.id,
+          }" @click="hdlClickCategory(item)" v-for="item in category" >
+          {{ item.text }}
+          </li>
         </ul>
       </div>
     </div>
 
     <div class="lvideo-list">
-      <a class="video-item" :href="handleDetail(item.vod_id)" v-for="item in tData.vodData">
-        <div class="cover-wrap">
-          <img :src="item.vod_pic" />
-          <span class="remarks">{{ item.vod_remarks }}</span>
-        </div>
-        <div class="meta-wrap">
-          <div class="title">{{ item.vod_name }}</div>
-          <div class="info">{{ getFormatTime(item.vod_time, false) }}更新</div>
-        </div>
-      </a>
+        <a class="video-item"  :href="handleDetail(subItem.id, id)" v-for="subItem in currentVideos">
+          <div class="cover-wrap">
+            <img v-lazy="subItem.pic" />
+            <span class="remarks">{{ subItem.desc }}</span>
+          </div>
+          <div class="meta-wrap">
+            <div class="title">{{ subItem.name }}</div>
+            <div class="info">{{ subItem.last }}更新</div>
+          </div>
+        </a>
     </div>
 
-    <div class="page-wrap" v-if="num_pages > 1">
-      <div class="page-item" :class="page === 1 ? 'disable' : ''" @click="handlePre()">上页</div>
-      <div class="page-item" :class="page === num_pages ? 'disable' : ''" @click="handleNext()">下页</div>
+    <div class="page-wrap" v-if="true">
+      <div class="page-item" :class="true ? 'disable' : ''" @click="">上页</div>
+      <div class="page-item" :class="false ? 'disable' : ''" @click="">下页</div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { getFormatTime } from '@/utils'
+import { Category, Data, DataVideo } from '@/api/types'
+import useVods from '@/store/modules/useVods'
+import { watch } from 'vue'
+import { useRoute } from 'vue-router'
+import * as maccmsApi from '@/api/maccms'
 
-const currentClass = ref('全部')
-const currentArea = ref('全部')
-const currentYear = ref('全部')
+const props = defineProps<{
+  id: string | number
+}>()
 
-const page = ref(1)
-const num_pages = ref(0)
+const { getCategoryByID } = useVods()
+const { category: categoryCol } = storeToRefs(useVods())
 
-const vodClassData = ['全部', '动作', '爱情', '喜剧', '科幻', '恐怖', '剧情']
-const vodAreaData = ['全部', '大陆', '香港', '台湾', '加拿大', '印度', '土耳其', '墨西哥', '巴西', '日本', '韩国', '西班牙', '英国', '美国', '泰国', '法国']
-const vodYearData: any = ['全部']
-for (let i = 2023; i > 2004; i--) {
-  vodYearData.push(i)
-}
-
-const categoryData = reactive({
-  vodClassData,
-  vodAreaData,
-  vodYearData,
+const route = useRoute()
+watch(()=> route.query, p=> {
+  currentCategory.value = null
+  const id = +(p.id as string)
+  init(id)
 })
 
-const tData = reactive<any>({
-  vodData: [],
+const currentCategory = ref<Category | null>(null)
+const currentData = ref<Data>()
+
+const category = computed(()=> {
+  const val = categoryCol.value.get(+props.id)
+  return val
 })
 
-const handleClickClass = (item) => {
-  currentClass.value = item
-  page.value = 1
-  getData()
-}
-const handleClickArea = (item) => {
-  currentArea.value = item
-  page.value = 1
-  getData()
-}
-const handleClickYear = (item) => {
-  currentYear.value = item
-  page.value = 1
-  getData()
-}
-
-onMounted(() => {
-  page.value = 1
-  getData()
+const currentVideos = computed<DataVideo[]>(()=> {
+  if (!currentData.value) return []
+  return currentData.value.videos
 })
 
-const handleDetail = (vod_id) => {
-  return '/detail/' + vod_id
+const handleDetail = (vod_id: number, mid: number | string) => {
+  return `/detail/${vod_id}?mid=${mid}`
 }
 
-const getData = function () {
-  const filterDict = {}
-
-  filterDict['vod_type'] = 1
-  if (currentClass.value !== '全部') {
-    filterDict['vod_class'] = currentClass.value
-  }
-  if (currentArea.value !== '全部') {
-    filterDict['vod_area'] = currentArea.value
-  }
-  if (currentYear.value !== '全部') {
-    filterDict['vod_year'] = currentYear.value
-  }
-  filterDict['page'] = page.value
-  // listApi(filterDict)
-  //   .then((res) => {
-  //     console.log(res.data)
-  //     tData.vodData = res.data
-  //     // 分页
-  //     page.value = res.page
-  //     num_pages.value = res.num_pages
-  //   })
-  //   .catch((err) => {
-  //     console.log(err)
-  //   })
+async function getData() {
+  const data = await maccmsApi.getHomeWithPageAndCategory(+props.id, 1, currentCategory.value?.id || -1)
+  currentData.value = data
 }
 
-const handlePre = () => {
-  if (page.value > 1) {
-    page.value = page.value - 1
-    getData()
-  }
+async function init(id?: number) {
+  id = id ? id : +props.id
+  const val =getCategoryByID(id)
+  currentCategory.value = val.length ? val[0] : null
+  getData()
 }
 
-const handleNext = () => {
-  if (page.value < num_pages.value) {
-    page.value = page.value + 1
-    getData()
-  }
+async function hdlClickCategory(item: any) {
+  console.log('item: ', item);
+  currentCategory.value = item
+  await getData()
 }
+
+onMounted(init)
+
 </script>
 
 <style scoped lang="less">

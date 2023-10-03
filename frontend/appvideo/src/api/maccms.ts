@@ -23,6 +23,19 @@ export async function getList() {
   return data
 }
 
+export async function getHomeWithPageAndCategory(cmsID: number, page = 1, category = -1) {
+  const data = (await http.request<ApiResult<Data>>({
+    method: "post",
+    url: `/maccms/proxy/${cmsID}`,
+    data: {
+      request_action: RequestAction.home,
+      page,
+      category,
+    },
+  })).data.data
+  return data
+}
+
 export async function getDetail(mid: number | string, detailID: number | string) {
   const data = (await http.request<ApiResult<DataVideo[]>>({
     method: "post",
