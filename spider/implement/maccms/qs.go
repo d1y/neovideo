@@ -25,6 +25,14 @@ func (b *MaccmsQSBuilder) SetKeyword(keyword string) *MaccmsQSBuilder {
 	return b
 }
 
+func (b *MaccmsQSBuilder) SetHome(page int, tid []int) *MaccmsQSBuilder {
+	b.SetPage(page)
+	if len(tid) >= 1 && tid[0] >= 1 {
+		b.SetCategory(tid[0])
+	}
+	return b
+}
+
 func (b *MaccmsQSBuilder) SetPage(page int) *MaccmsQSBuilder {
 	b.m["pg"] = page
 	return b

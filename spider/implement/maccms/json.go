@@ -71,8 +71,11 @@ func (m *IMacCMS) byte2gjson(buf []byte) (gjson.Result, error) {
 	return gjson.ParseBytes(buf), nil
 }
 
-func (m *IMacCMS) JSONGetHome() (IMacCMSHomeData, error) {
-	res, err := axios.Get(m.ApiURL)
+func (m *IMacCMS) JSONGetHome(page int, tid ...int) (IMacCMSHomeData, error) {
+	res, err := m.qs.SetHome(page, tid).BuildGetRequest(m.ApiURL)
+	if err != nil {
+		return IMacCMSHomeData{}, err
+	}
 	if err != nil {
 		return IMacCMSHomeData{}, err
 	}

@@ -43,9 +43,11 @@ func (pc *IMacCMSProxyController) re2ID(reqAction int) sbIDFunc {
 	return fn
 }
 
-func (pc *IMacCMSProxyController) getHomeCacheID(id int) (s string) {
-	_, s = pc.re2ID(proxyActionWithHome)(i2s(id))
-	return
+func (pc *IMacCMSProxyController) getHomeCacheID(id int, page int, category int) string {
+	sb, _ := pc.re2ID(proxyActionWithHome)(i2s(id))
+	sb.AppendArray(strconv.Itoa(page), idSep)
+	sb.AppendArray(strconv.Itoa(category), idSep)
+	return sb.String()
 }
 
 func (pc *IMacCMSProxyController) getCategoryCacheID(id int) (s string) {
@@ -85,11 +87,16 @@ func (pc *IMacCMSProxyController) realRequest(data repos.MacCMSRepo, req maccms.
 	var result any
 	var err error = nil
 	cms := maccms.New(data.RespType, data.Api)
+	page := req.Page
+	if page == 0 {
+		page = 1
+	}
 	switch req.RequestAction {
 	case proxyActionWithHome:
-		k := pc.getHomeCacheID(id)
+		var category = req.Category
+		k := pc.getHomeCacheID(id, page, category)
 		if ok := reUseCache[maccms.IMacCMSHomeData](pc.cc, k, &result); !ok || alwayFetch {
-			result, err = cms.GetHome()
+			result, err = cms.GetHome(page, category)
 			pc.setResult2Cache(err, k, result)
 		}
 	case proxyActionWithCategory:
@@ -113,7 +120,7 @@ func (pc *IMacCMSProxyController) realRequest(data repos.MacCMSRepo, req maccms.
 	case proxyActionWithSearch:
 		k := pc.getSearchCacheID(id, req.Keyword)
 		if ok := reUseCache[maccms.IMacCMSVideosAndHeader](pc.cc, k, &result); !ok || alwayFetch {
-			result, err = cms.GetSearch(req.Keyword /* FIXME: check keyword is not empty */, req.Page)
+			result, err = cms.GetSearch(req.Keyword /* FIXME: check keyword is not empty */, page)
 			pc.setResult2Cache(err, k, result)
 		}
 	}

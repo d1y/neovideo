@@ -48,6 +48,9 @@ func (m *IMacCMS) xmlParseClassGetCategory(doc *etree.Element) []repos.IMacCMSCa
 	return category
 }
 
+// TODO: 增强该方法, 传递
+// 1. method 方法(get / post)
+// 2. qs 参数
 func (m *IMacCMS) xmlGetURL2XMLDocument(url string) (*etree.Document, error) {
 	res, err := axios.Get(url)
 	if err != nil {
@@ -221,12 +224,14 @@ func (m *IMacCMS) XMLGetDetailWithEtreeRoot(root *etree.Element) (IMacCMSListAtt
 	return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, errors.New("")
 }
 
-func (m *IMacCMS) XMLGetHome() (IMacCMSHomeData, error) {
-	root, err := m.xmlGetURL2XMLDocumentWithRoot(m.ApiURL)
+func (m *IMacCMS) XMLGetHome(page int, tid ...int) (IMacCMSHomeData, error) {
+	res, err := m.qs.SetHome(page, tid).BuildGetRequest(m.ApiURL)
 	if err != nil {
 		return IMacCMSHomeData{}, err
 	}
-	return m.XMLGetHomeWithEtreeRoot(root)
+	doc := etree.NewDocument()
+	doc.ReadFromBytes(res)
+	return m.XMLGetHomeWithEtreeRoot(doc.Root())
 }
 
 func (m *IMacCMS) XMLGetCategory() ([]repos.IMacCMSCategory, error) {

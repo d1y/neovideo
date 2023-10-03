@@ -78,7 +78,7 @@ func (vc *IVodController) queryAndCMSFetchHome() ([]homeItem, error) {
 				ID:   item.ID,
 				Api:  item.Api,
 			}
-			val, err := maccms.New(item.RespType, item.Api).GetHome()
+			val, err := maccms.New(item.RespType, item.Api).GetHome(1)
 			if err != nil {
 				im.Error = err.Error()
 			} else {

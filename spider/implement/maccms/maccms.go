@@ -62,11 +62,11 @@ func GetResponseType(raw string) respType {
 func (m *IMacCMS) Request(xhr XHRRequest) {
 }
 
-func (m *IMacCMS) GetHome() (IMacCMSHomeData, error) {
+func (m *IMacCMS) GetHome(page int, tid ...int) (IMacCMSHomeData, error) {
 	if m.ResponseType == MacCMSReponseTypeJSON {
-		return m.JSONGetHome()
+		return m.JSONGetHome(page, tid...)
 	}
-	return m.XMLGetHome()
+	return m.XMLGetHome(page, tid...)
 }
 
 func (m *IMacCMS) GetCategory() ([]repos.IMacCMSCategory, error) {

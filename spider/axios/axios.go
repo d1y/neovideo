@@ -100,6 +100,7 @@ func initInstance() {
 			}
 			return nil
 		})
+	// FIXME: 单元测试的话这里由于没有初始化会 panic
 	if config.Get().IsDev() {
 		iq.Request.EnableDebugLog()
 	}
