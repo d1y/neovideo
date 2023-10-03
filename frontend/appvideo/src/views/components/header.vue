@@ -3,7 +3,7 @@
     <div class="header-wrap">
       <a class="left-wrap" href="/">
         <img :src="LogoImg" class="logo" />
-        <div class="title">88视频</div>
+        <div class="title">新视频</div>
       </a>
       <div class="right-wrap">
         <div class="search-wrap">
