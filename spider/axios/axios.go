@@ -90,6 +90,7 @@ func initInstance() {
 	iq = new(iReq)
 	iq.cc = cache.New(42*time.Second, 60*time.Second)
 	iq.Request = req.C().
+		SetTimeout(3 * time.Second).
 		EnableInsecureSkipVerify().
 		OnAfterResponse(func(client *req.Client, resp *req.Response) error {
 			if resp.IsSuccessState() {
