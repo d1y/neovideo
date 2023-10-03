@@ -1,6 +1,8 @@
 package axios
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -14,6 +16,8 @@ import (
 
 var sn = new(sync.Once)
 var iq *iReq
+
+var errFlag = []byte("err{0}")
 
 func getCacheKey(m, u string, qs url.Values) string {
 	return fmt.Sprintf("%s%s?=%s", m, u, qs.Encode())
@@ -56,6 +60,9 @@ func handleResponse(resp *req.Response, err error, key string) ([]byte, error) {
 	b, e := io.ReadAll(resp.Body)
 	if e != nil {
 		return nil, e
+	}
+	if bytes.Equal(b, errFlag) {
+		return nil, errors.New("err{0}")
 	}
 	iq.cc.SetDefault(key, b)
 	return b, nil
