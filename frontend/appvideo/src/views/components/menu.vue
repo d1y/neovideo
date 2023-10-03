@@ -63,6 +63,8 @@ onMounted(()=> {
     display: flex;
     flex-direction: row;
     gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
 
     .category__list__item {
       display: inline-block;
