@@ -29,6 +29,11 @@ import (
 // 参考返回值: https://www.77zy.vip/inc/m3u8.php
 var malwaredomainlistHTMLRegexp = regexp.MustCompile(`^<!doctype html>[\s\S]*data-adblockkey[\s\S]*>window\.park =`)
 
+// https://www.crazydomains.com.au/help/what-is-a-parked-domain-name
+//
+// https://stackoverflow.com/questions/490025/method-to-detect-a-parked-page
+var parkedDomainName = regexp.MustCompile(`>window\.location\.replace\(\'https?`)
+
 type IMacCMSController struct {
 	sm sync.Mutex
 }
@@ -146,7 +151,7 @@ func (im *IMacCMSController) checkOnce(i *repos.MacCMSRepo) map[string]any {
 	} else {
 		b, e := io.ReadAll(resp.Body)
 		s := string(b)
-		if e != nil || malwaredomainlistHTMLRegexp.MatchString(s) {
+		if e != nil || malwaredomainlistHTMLRegexp.MatchString(s) || parkedDomainName.MatchString(s) {
 			if e != nil {
 				m["message"] = e.Error()
 			} else {
