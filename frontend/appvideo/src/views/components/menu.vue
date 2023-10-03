@@ -8,9 +8,10 @@
 
 <script setup lang="ts">
 import useVods from '@/store/modules/useVods'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 
 const { setCurrentCategory } = useVods()
 const { menus, currentCategory: currentMenu }= storeToRefs(useVods())
@@ -37,6 +38,16 @@ function hdlClick(id: number | number) {
     }
   })
 }
+
+onMounted(()=> {
+  const p = route.path
+  const q = route.query.id as string
+  if (p == "/index") {
+    setCurrentCategory(-1)
+  } else {
+    q && setCurrentCategory(+q)
+  }
+})
 </script>
 
 <style scoped lang="less">

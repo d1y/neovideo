@@ -14,21 +14,29 @@
     </div>
 
     <div class="lvideo-list">
-        <a class="video-item"  :href="handleDetail(subItem.id, id)" v-for="subItem in currentVideos">
-          <div class="cover-wrap">
-            <img v-lazy="subItem.pic" />
-            <span class="remarks">{{ subItem.desc }}</span>
-          </div>
-          <div class="meta-wrap">
-            <div class="title">{{ subItem.name }}</div>
-            <div class="info">{{ subItem.last }}更新</div>
-          </div>
-        </a>
+      <div v-if="!currentVideos.length">
+        <h1>暂无数据 :(</h1>
+      </div>
+      <a v-else class="video-item"  :href="handleDetail(subItem.id, id)" v-for="subItem in currentVideos">
+        <div class="cover-wrap">
+          <img v-lazy="subItem.pic" />
+          <span class="remarks">{{ subItem.desc }}</span>
+        </div>
+        <div class="meta-wrap">
+          <div class="title">{{ subItem.name }}</div>
+          <div class="info">{{ subItem.last }}更新</div>
+        </div>
+      </a>
     </div>
 
-    <div class="page-wrap" v-if="true">
-      <div class="page-item" :class="true ? 'disable' : ''" @click="">上页</div>
-      <div class="page-item" :class="false ? 'disable' : ''" @click="">下页</div>
+    <div class="page-wrap" v-if="show">
+      <div class="page-item" :class="{
+        disable: !isPrev,
+      }" @click="hdlPageChange(false)">上页</div>
+      <div>{{ text }}</div>
+      <div class="page-item" :class="{
+        disable: !isNext,
+      }" @click="hdlPageChange(true)">下页</div>
     </div>
   </div>
 </template>
@@ -37,13 +45,18 @@ import { Category, Data, DataVideo } from '@/api/types'
 import useVods from '@/store/modules/useVods'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
+import usePagination from '@/composition/usePagination'
 import * as maccmsApi from '@/api/maccms'
 
 const props = defineProps<{
   id: string | number
 }>()
 
-const { getCategoryByID } = useVods()
+const currentPage = ref<number>(1)
+
+const { isPrev, isNext, show, text } = usePagination(currentPage, computed(()=> currentData.value?.list_header))
+
+const { getCategoryByID, loadVodHomeDataWithApi } = useVods()
 const { category: categoryCol } = storeToRefs(useVods())
 
 const route = useRoute()
@@ -63,7 +76,7 @@ const category = computed(()=> {
 
 const currentVideos = computed<DataVideo[]>(()=> {
   if (!currentData.value) return []
-  return currentData.value.videos
+  return currentData.value.videos || []
 })
 
 const handleDetail = (vod_id: number, mid: number | string) => {
@@ -71,24 +84,33 @@ const handleDetail = (vod_id: number, mid: number | string) => {
 }
 
 async function getData() {
-  const data = await maccmsApi.getHomeWithPageAndCategory(+props.id, 1, currentCategory.value?.id || -1)
+  const data = await maccmsApi.getHomeWithPageAndCategory(+props.id, currentPage.value, currentCategory.value?.id || -1)
   currentData.value = data
 }
 
 async function init(id?: number) {
   id = id ? id : +props.id
-  const val =getCategoryByID(id)
+  const val = getCategoryByID(id)
   currentCategory.value = val.length ? val[0] : null
   getData()
 }
 
 async function hdlClickCategory(item: any) {
-  console.log('item: ', item);
+  currentPage.value = 1
   currentCategory.value = item
   await getData()
 }
 
-onMounted(init)
+async function hdlPageChange(next: boolean) {
+  if (next) currentPage.value++
+  else currentPage.value--
+  await getData()
+}
+
+onMounted(async ()=> {
+  await loadVodHomeDataWithApi()
+  await init()
+})
 
 </script>
 
