@@ -2,9 +2,7 @@ import { defineStore } from 'pinia'
 import piniaStore from '@/store/index'
 import { AppState } from './types'
 
-export const useAppStore = defineStore(
-  // 唯一ID
-  'app',
+export const useAppStore = defineStore('app',
   {
     state: () => ({
       title: 'FastVue3, 一个快速开箱即用的Vue3+Vite模板',
@@ -16,8 +14,6 @@ export const useAppStore = defineStore(
       updateSettings(partial: Partial<AppState>) {
         this.$patch(partial)
       },
-
-      // Change theme color
       toggleTheme(dark: boolean) {
         if (dark) {
           this.theme = 'dark'

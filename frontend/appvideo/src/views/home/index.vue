@@ -26,10 +26,15 @@
 import { ref } from 'vue'
 import { getHome } from '@/api/vod'
 import { VodItem } from '@/api/types'
+import useVods from '@/store/modules/useVods'
+
+const { setVodData } = useVods()
+
 const data = ref<VodItem[]>()
 const getData = async function () {
-  const d = await getHome()
-  data.value = d
+  const vodhome = await getHome()
+  setVodData(vodhome)
+  data.value = vodhome
 }
 onMounted(getData)
 const handleDetail = (vod_id: number, mid: number) => {

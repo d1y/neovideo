@@ -1,5 +1,5 @@
 import { createPinia } from 'pinia'
-import { useAppStore } from './modules/app'
+import { useAppStore } from './modules/useApp'
 
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 

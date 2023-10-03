@@ -1,41 +1,23 @@
 <template>
   <div class="menu-wrap">
     <div class="category__list">
-      <div class="category__list__item" :class="currentMenu === item.id ? 'active' : ''" v-for="item in menuData" @click="handleNav(item.id)">{{ item.label }} </div>
+      <div class="category__list__item" :class="currentMenu === item.id ? 'active' : ''" v-for="item in menuData">{{ item.label }} </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const router = useRouter()
-const route = useRoute()
+import useVods from '@/store/modules/useVods'
 
-let currentMenu = ref('')
+const currentMenu = ref('index')
+const { menus }= storeToRefs(useVods())
 
-let menuData = reactive([
+const menuData = computed(()=> {
+  return [
   { label: '首页', id: 'index' },
-  { label: '电影', id: 'dianying' },
-  { label: '电视剧', id: 'dianshiju' },
-  { label: '综艺', id: 'zongyi' },
-  { label: '动漫', id: 'dongman' },
-  { label: '专题', id: 'zhuanti' },
-])
-
-// 监听地址栏路由
-watch(
-  () => route.name,
-  (newName: string) => {
-    currentMenu.value = newName
-  },
-  { immediate: true },
-)
-
-const data = reactive(['', '', '', '', '', '', '', ''])
-
-const handleNav = (name) => {
-  router.push({ name: name })
-  currentMenu.value = name
-}
+    ...menus.value,
+  ]
+})
 </script>
 
 <style scoped lang="less">
