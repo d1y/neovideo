@@ -76,11 +76,11 @@ func (m *IMacCMS) GetCategory() ([]repos.IMacCMSCategory, error) {
 	return m.XMLGetCategory()
 }
 
-func (m *IMacCMS) GetDetail(id int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
+func (m *IMacCMS) GetDetail(ids ...int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
 	if m.ResponseType == MacCMSReponseTypeJSON {
-		return m.JSONGetDetail(id)
+		return m.JSONGetDetail(ids...)
 	}
-	return m.XMLGetDetail(id)
+	return m.XMLGetDetail(ids...)
 }
 
 func (m *IMacCMS) GetSearch(keyword string, p int) (IMacCMSVideosAndHeader, error) {

@@ -252,8 +252,8 @@ func (m *IMacCMS) XMLGetSearch(keyword string, page int) (IMacCMSVideosAndHeader
 	return m.XMLGetSearchWithEtreeRoot(doc.Root())
 }
 
-func (m *IMacCMS) XMLGetDetail(id int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
-	res, err := m.qs.SetAction("videolist").SetIDS(id).BuildPostRequest(m.ApiURL)
+func (m *IMacCMS) XMLGetDetail(ids ...int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
+	res, err := m.qs.SetAction("videolist").SetIDS(ids...).BuildPostRequest(m.ApiURL)
 	if err != nil {
 		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
 	}

@@ -120,8 +120,8 @@ func (m *IMacCMS) JSONGetSearch(keyword string, page int) (IMacCMSVideosAndHeade
 	}, nil
 }
 
-func (m *IMacCMS) JSONGetDetail(id int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
-	res, err := m.qs.SetDetailAction().SetIDS(id).BuildGetRequest(m.ApiURL)
+func (m *IMacCMS) JSONGetDetail(ids ...int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
+	res, err := m.qs.SetDetailAction().SetIDS(ids...).BuildGetRequest(m.ApiURL)
 	if err != nil {
 		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
 	}

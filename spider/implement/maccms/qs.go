@@ -2,17 +2,26 @@ package maccms
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
 
 	"d1y.io/neovideo/spider/axios"
 	"github.com/imroc/req/v3"
+	"golang.org/x/exp/slices"
 )
 
 const (
 	MacCMSListAction   = "list"
 	MacCMSDetailAction = "detail"
+)
+
+var (
+	// Deprecated: remove this
+	ignoreQueryGen = []string{
+		"ids",
+	}
 )
 
 type MaccmsQSBuilder struct {
@@ -73,18 +82,36 @@ func (b *MaccmsQSBuilder) SetIDS(ids ...int) *MaccmsQSBuilder {
 	return b
 }
 
-func (b *MaccmsQSBuilder) Build() map[string]string {
+// FIXME: querystring 全部自己生成, 而不是使用 req 里 net/url 标准库生成的自动转码方式
+//
+// Deprecated: 不稳定方法..
+func (b *MaccmsQSBuilder) Build(full ...bool) (map[string]string, map[string]string, bool) {
 	var result = make(map[string]string)
+	var customMap = make(map[string]string)
+	var isFull = false
+	if len(full) == 1 {
+		isFull = true
+	}
 	for k, v := range b.m {
+		var onceNeedCustom = slices.Contains(ignoreQueryGen, k) && !isFull
 		if strV, ok := v.(string); ok {
-			result[k] = strV
+			if onceNeedCustom {
+				customMap[k] = strV
+			} else {
+				result[k] = strV
+			}
 		} else {
 			if reflect.TypeOf(v).Kind() == reflect.Int {
-				result[k] = strconv.Itoa(v.(int))
+				s := strconv.Itoa(v.(int))
+				if onceNeedCustom {
+					customMap[k] = s
+				} else {
+					result[k] = s
+				}
 			}
 		}
 	}
-	return result
+	return result, customMap, len(customMap) >= 1
 }
 
 func (b *MaccmsQSBuilder) wrapperRequestHeader(r *req.Request) *req.Request {
@@ -95,31 +122,47 @@ func (b *MaccmsQSBuilder) wrapperRequestHeader(r *req.Request) *req.Request {
 // 该方法没有包装缓存机制, 不要使用
 // Deprecated: use BuildGetRequest/BuildPostRequest
 func (b *MaccmsQSBuilder) BuildRequest() *req.Request {
-	return b.wrapperRequestHeader(axios.Request().SetQueryParams(b.Build()))
+	sq, _, _ := b.Build(true)
+	return b.wrapperRequestHeader(axios.Request().SetQueryParams(sq))
+}
+
+func (b *MaccmsQSBuilder) WrapperRealURL(api string) (string, map[string]string) {
+	qs, unqs, ok := b.Build()
+	var realApi = api
+	if ok {
+		// TODO: 或许应该使用标准的标准的 `net/url` 包生成 querystring
+		var s = "?"
+		for k, v := range unqs {
+			s += fmt.Sprintf("%s=%s&", k, v)
+		}
+		s = s[:len(s)-1]
+		realApi += s
+	}
+	return realApi, qs
 }
 
 func (b *MaccmsQSBuilder) BuildGetRequest(api string) ([]byte, error) {
-	return axios.Get(api, b.Build())
+	realApi, qs := b.WrapperRealURL(api)
+	return axios.Get(realApi, qs)
 }
 
 func (b *MaccmsQSBuilder) BuildPostRequest(api string) ([]byte, error) {
-	return axios.Post(api, b.Build())
+	realApi, qs := b.WrapperRealURL(api)
+	return axios.Post(realApi, qs)
 }
 
 func (b *MaccmsQSBuilder) String() (string, error) {
-	val, err := json.Marshal(b.Build())
+	q, _, _ := b.Build(true)
+	val, err := json.Marshal(q)
 	if err != nil {
 		return "", err
 	}
 	return string(val), nil
 }
 
-func (b *MaccmsQSBuilder) MustString() string {
-	val, err := json.Marshal(b.Build())
-	if err != nil {
-		return ""
-	}
-	return string(val)
+func (b *MaccmsQSBuilder) MustString() (s string) {
+	s, _ = b.String()
+	return
 }
 
 func NewMacCMSQSBuilder(bType string) *MaccmsQSBuilder {
