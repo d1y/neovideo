@@ -34,6 +34,7 @@ type IVideo struct {
 	State      string                              `json:"state" gorm:"state"`             // 状态
 	Actor      string                              `json:"actor" gorm:"actor"`             // 演员
 	Director   string                              `json:"director" gorm:"director"`       // 导演
+	R18        bool                                `json:"r18" gorm:"r18"`                 // 18+
 }
 
 type VideoRepo struct {
