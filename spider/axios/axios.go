@@ -14,6 +14,11 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
+const (
+	// FIXME: 单元测试的话由于没有初始化配置文件会 panic :^)
+	skipConfig = true
+)
+
 var sn = new(sync.Once)
 var iq *iReq
 
@@ -101,8 +106,7 @@ func initInstance() {
 			}
 			return nil
 		})
-	// FIXME: 单元测试的话这里由于没有初始化会 panic
-	if config.Get().IsDev() {
+	if skipConfig || config.Get().IsDev() {
 		iq.Request.EnableDebugLog()
 	}
 }
