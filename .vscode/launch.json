@@ -15,12 +15,22 @@
       ]
     },
     {
+      "name": "debugger current go file",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${file}",
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "web admin run devserver",
       "cwd": "${workspaceRoot}/frontend/admin",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"]
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ]
     },
     {
       "type": "chrome",
