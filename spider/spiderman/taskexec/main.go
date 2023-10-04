@@ -1,13 +1,36 @@
 package main
 
 import (
+	"io"
+	"os"
+	"path/filepath"
+	"sync"
+
 	"d1y.io/neovideo/models/repos"
 	"d1y.io/neovideo/spider/spiderman"
 	"github.com/acmestack/gorm-plus/gplus"
+	"github.com/google/uuid"
+	"github.com/imroc/req/v3"
 	"gorm.io/datatypes"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
+
+var (
+	dir = "./public"
+)
+
+func ensureDir(baseDir string) error {
+	info, err := os.Stat(baseDir)
+	if err == nil && info.IsDir() {
+		return nil
+	}
+	return os.MkdirAll(baseDir, 0755)
+}
+
+func init() {
+	ensureDir(dir)
+}
 
 func main() {
 	db, err := gorm.Open(sqlite.Open("/Users/d1y/code/github/neovideo/db.sqlite3"), &gorm.Config{})
@@ -24,7 +47,14 @@ func main() {
 		if !item.Successful {
 			continue
 		}
+		var wg sync.WaitGroup
 		for _, subItem := range *item.Videos {
+			cover := ""
+			if len(subItem.Pic) >= 1 {
+				wg.Add(1)
+				cover = createFilename(subItem.Pic)
+				go imageDownload(subItem.Pic, cover, &wg)
+			}
 			var value = repos.VideoRepo{
 				IVideo: repos.IVideo{
 					SpiderType: "maccms",
@@ -33,7 +63,7 @@ func main() {
 					RealID:     subItem.Id,
 					RealTime:   subItem.Last,
 					RealCover:  subItem.Pic,
-					Cover:      "",
+					Cover:      cover,
 					CategoryID: subItem.Tid,
 					Lang:       subItem.Lang,
 					Area:       subItem.Area,
@@ -60,8 +90,36 @@ func main() {
 			value.Videos = datatypes.NewJSONSlice[repos.IVideoDataInfo](videos)
 			list = append(list, &value)
 		}
+		wg.Wait()
 	}
 	if err := gplus.InsertBatch[repos.VideoRepo](list).Error; err != nil {
 		panic(err)
 	}
+}
+
+func createFilename(url string) string {
+	ext := filepath.Ext(url)
+	uuid := uuid.New()
+	filename := uuid.String()
+	filename += ext
+	path := filepath.Join(dir, filename)
+	return path
+}
+
+func imageDownload(url string, filename string, wg *sync.WaitGroup) error {
+	defer wg.Done()
+	resp, err := req.Get(url)
+	if err != nil {
+		return err
+	}
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return err
+	}
+	return nil
 }
