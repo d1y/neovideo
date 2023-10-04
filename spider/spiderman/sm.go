@@ -1,10 +1,8 @@
 package spiderman
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"sync"
 
 	"d1y.io/neovideo/spider/implement/maccms"
@@ -15,7 +13,7 @@ type task struct {
 	Successful bool
 	Page       int
 	Reason     string
-	Vidoes     *[]maccms.IMacCMSListVideoItem
+	Videos     *[]maccms.IMacCMSListVideoItem
 }
 
 func (t *task) SetReason(msg string) {
@@ -23,7 +21,7 @@ func (t *task) SetReason(msg string) {
 }
 
 func (t *task) SetVideos(v *[]maccms.IMacCMSListVideoItem) {
-	t.Vidoes = v
+	t.Videos = v
 }
 
 func (t *task) SetSuccessful(v *[]maccms.IMacCMSListVideoItem) {
@@ -42,7 +40,7 @@ func newTask(page int) *task {
 	}
 }
 
-func Exec(rtype string, api string) error {
+func Exec(rtype string, api string) ([]*task, error) {
 	pool, err := ants.NewPool(240)
 	if err != nil {
 		panic(err)
@@ -51,12 +49,12 @@ func Exec(rtype string, api string) error {
 	// cms := maccms.New(rtype, api)
 	// homeData, err := cms.GetHome(1)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// header := homeData.ListHeader
 	var count = 50 //header.PageCount
 	if count <= 1 {
-		return errors.New("count <= 1, not need task exec")
+		return nil, errors.New("count <= 1, not need task exec")
 	}
 	var sm sync.Mutex
 	var wg sync.WaitGroup
@@ -68,14 +66,7 @@ func Exec(rtype string, api string) error {
 		pool.Submit(taskWrapper(&sm, &wg, idx, rtype, api, tasks))
 	}
 	wg.Wait()
-	b, e := json.Marshal(tasks)
-	if e != nil {
-		panic(e)
-	}
-	if err := os.WriteFile("1.json", b, 0755); err != nil {
-		panic("写入文件失败")
-	}
-	return nil
+	return tasks, nil
 }
 
 func taskWrapper(sm *sync.Mutex, wg *sync.WaitGroup, idx int, rt string, api string, tasks []*task) func() {
