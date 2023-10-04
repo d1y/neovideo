@@ -301,7 +301,15 @@ func (im *IMacCMSController) removeUnavailable(ctx iris.Context) {
 }
 
 func (im *IMacCMSController) startSpider(ctx iris.Context) {
-	id, _ := handler.NewIDWithContext(ctx)
+	type body struct {
+		ID string `json:"id" form:"id"`
+	}
+	var by body
+	if err := ctx.ReadBody(&by); err != nil {
+		web.NewError(err).Build(ctx)
+		return
+	}
+	id := by.ID
 	if spiderman.IsStart() {
 		msg := spiderman.GetTaskMsg()
 		web.NewMessage(msg).SetSuccessWithBool(true).Build(ctx)
@@ -316,6 +324,11 @@ func (im *IMacCMSController) startSpider(ctx iris.Context) {
 	web.NewMessage("已开启爬虫任务").Build(ctx)
 }
 
+func (im *IMacCMSController) stopSpider(ctx iris.Context) {
+	execNum := spiderman.Stop()
+	web.NewMessage("任务停止成功").SetData(execNum).Build(ctx)
+}
+
 func Register(u iris.Party) {
 	var imc IMacCMSController
 	var px IMacCMSProxyController
@@ -327,6 +340,7 @@ func Register(u iris.Party) {
 	u.Post("/allcheck", imc.allcheck).Name = "检查苹果CMS"
 	u.Post("/allcheck/sync", imc.allcheckAndSync).Name = "检查苹果CMS并同步到服务器"
 	u.Delete("/allcheck/unavailable", imc.removeUnavailable).Name = "删除不可用的苹果CMS"
-	u.Post("/spider/{id:int}", imc.startSpider).Name = "开始爬取数据"
+	u.Post("/spider/start", imc.startSpider).Name = "开始爬取cms全站数据任务"
+	u.Post("/spider/stop", imc.stopSpider).Name = "关闭爬取cms全站数据"
 	u.PartyFunc("/proxy", px.Register)
 }

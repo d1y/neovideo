@@ -26,6 +26,9 @@ var (
 
 var pool *ants.Pool
 
+// FIXME: 实际上没啥用
+const poolSize = 6
+
 type Counter struct {
 	sm      sync.Mutex
 	count   int
@@ -74,7 +77,7 @@ func (ct *Counter) String() string {
 	if ct.GetCurrent() == 0 && ct.GetCount() == 0 {
 		return "任务准备中(或已失败)"
 	}
-	var msg = fmt.Sprintf("%d/%d", ct.GetCurrent(), ct.GetCount())
+	var msg = fmt.Sprintf("%d/%d(协程数量%d)", ct.GetCurrent(), ct.GetCount(), pool.Running())
 	return msg
 }
 
@@ -131,8 +134,21 @@ func newTask(page int) *task {
 	}
 }
 
+func newPool() (err error) {
+	pool, err = ants.NewPool(poolSize)
+	return
+}
+
+func Stop() int {
+	if pool == nil {
+		return 0
+	}
+	pool.Release()
+	return pool.Running()
+}
+
 func IsStart() bool {
-	return ct.IsStart()
+	return pool.Running() >= 1 || ct.IsStart()
 }
 
 func Start(rtype, api string, id uint) (any, error) {
@@ -141,8 +157,7 @@ func Start(rtype, api string, id uint) (any, error) {
 	}
 	ct.Padding()
 	defer ct.Reset()
-	var err error
-	pool, err = ants.NewPool(240)
+	err := newPool()
 	if err != nil {
 		return nil, err
 	}
@@ -160,9 +175,9 @@ func Start(rtype, api string, id uint) (any, error) {
 	ct.SetCount(count)
 	var sm sync.Mutex
 	var wg sync.WaitGroup
-	wg.Add(count)
 	for i := 0; i < count; i++ {
 		idx := i
+		wg.Add(1)
 		pool.Submit(taskWrapper(&sm, &wg, idx, rtype, api, id))
 	}
 	wg.Wait()
