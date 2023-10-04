@@ -50,6 +50,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.25 // indirect
 	github.com/onsi/ginkgo/v2 v2.12.0 // indirect
+	github.com/panjf2000/ants/v2 v2.8.2 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
