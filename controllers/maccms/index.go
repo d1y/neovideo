@@ -14,6 +14,7 @@ import (
 	"d1y.io/neovideo/models/web"
 	"d1y.io/neovideo/pkgs/safeset"
 	"d1y.io/neovideo/spider/implement/maccms"
+	"d1y.io/neovideo/spider/spiderman"
 	"d1y.io/neovideo/sqls"
 	"gorm.io/datatypes"
 
@@ -299,6 +300,22 @@ func (im *IMacCMSController) removeUnavailable(ctx iris.Context) {
 	web.NewData(unavailable).SetMessage("删除成功").Build(ctx)
 }
 
+func (im *IMacCMSController) startSpider(ctx iris.Context) {
+	id, _ := handler.NewIDWithContext(ctx)
+	if spiderman.IsStart() {
+		msg := spiderman.GetTaskMsg()
+		web.NewMessage(msg).SetSuccessWithBool(true).Build(ctx)
+		return
+	}
+	val, gb := gplus.SelectById[repos.MacCMSRepo](id)
+	if gb.Error != nil {
+		web.NewError(gb.Error).Build(ctx)
+		return
+	}
+	go spiderman.Start(val.RespType, val.Api, val.ID)
+	web.NewMessage("已开启爬虫任务").Build(ctx)
+}
+
 func Register(u iris.Party) {
 	var imc IMacCMSController
 	var px IMacCMSProxyController
@@ -310,5 +327,6 @@ func Register(u iris.Party) {
 	u.Post("/allcheck", imc.allcheck).Name = "检查苹果CMS"
 	u.Post("/allcheck/sync", imc.allcheckAndSync).Name = "检查苹果CMS并同步到服务器"
 	u.Delete("/allcheck/unavailable", imc.removeUnavailable).Name = "删除不可用的苹果CMS"
+	u.Post("/spider/{id:int}", imc.startSpider).Name = "开始爬取数据"
 	u.PartyFunc("/proxy", px.Register)
 }

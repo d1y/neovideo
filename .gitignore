@@ -60,3 +60,6 @@ frontend/demo
 data/
 
 web/admin
+
+public/
+data.log

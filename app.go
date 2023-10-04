@@ -4,8 +4,11 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"os"
 
+	"d1y.io/neovideo/common/fsutil"
 	"d1y.io/neovideo/config"
+	"d1y.io/neovideo/config/constant"
 	"d1y.io/neovideo/controllers/handler"
 	jiexiControllers "d1y.io/neovideo/controllers/jiexi"
 	maccmsControllers "d1y.io/neovideo/controllers/maccms"
@@ -15,11 +18,23 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/logger"
 	"github.com/kataras/iris/v12/middleware/recover"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
 type NeovideoApp struct {
 	App *iris.Application
+}
+
+func injectLog() {
+	file, err := os.OpenFile(constant.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0755)
+	if err != nil {
+		panic(err)
+	}
+	logrus.SetFormatter(&logrus.TextFormatter{
+		DisableQuote: true,
+	})
+	logrus.SetOutput(file)
 }
 
 func (na *NeovideoApp) Init() {
@@ -29,6 +44,8 @@ func (na *NeovideoApp) Init() {
 		panic("config file path is required")
 	}
 	_, err := config.InitWithFile(*confPath)
+	fsutil.EnsureDir( /* auto create public dir*/ constant.Public)
+	injectLog()
 	if err != nil {
 		panic(err)
 	}
