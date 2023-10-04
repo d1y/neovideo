@@ -30,8 +30,9 @@ type IMacCMSVideoDDTag struct {
 }
 
 type IMacCMSVideoDDTagWithURL struct {
-	Name string `json:"name"`
-	URL  string `json:"url"` /* TODO: check url is [m3u8|mp4] */
+	Name  string `json:"name"`
+	URL   string `json:"url"`
+	Embed bool   `json:"embed"`
 }
 
 type IMacCMSListVideoItem struct {
