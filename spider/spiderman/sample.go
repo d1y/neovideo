@@ -30,7 +30,7 @@ var pool *ants.Pool
 const poolSize = 6
 
 type Counter struct {
-	sm      sync.Mutex
+	sm      sync.RWMutex
 	count   int
 	current int
 }
@@ -62,14 +62,14 @@ func (ct *Counter) Reset() {
 }
 
 func (ct *Counter) GetCount() int {
-	ct.sm.Lock()
-	defer ct.sm.Unlock()
+	ct.sm.RLock()
+	defer ct.sm.RUnlock()
 	return ct.count
 }
 
 func (ct *Counter) GetCurrent() int {
-	ct.sm.Lock()
-	defer ct.sm.Unlock()
+	ct.sm.RLock()
+	defer ct.sm.RUnlock()
 	return ct.current
 }
 
@@ -96,7 +96,7 @@ func (ct *Counter) IsStart() bool {
 var ct = Counter{
 	count:   -1,
 	current: -1,
-	sm:      sync.Mutex{},
+	sm:      sync.RWMutex{},
 }
 
 func GetTaskMsg() string {
