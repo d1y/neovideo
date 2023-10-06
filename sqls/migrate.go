@@ -40,5 +40,14 @@ func MigrateBatch() {
 			}
 			return nil
 		},
-	}}).Migrate()
+	},
+	// {
+	// 	ID: "202310062000",
+	// 	Migrate: func(tx *gorm.DB) error {
+	// 		tx.Model(&repos.MacCMSRepo{}).Where("1 = 1").UpdateColumn("r18", true)
+	// 		tx.Model(&repos.VideoRepo{}).Where("1 = 1").UpdateColumn("r18", true)
+	// 		return nil
+	// 	},
+	// },
+	}).Migrate()
 }
