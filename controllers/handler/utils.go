@@ -5,9 +5,30 @@ import (
 	"io"
 
 	"d1y.io/neovideo/controllers/typekit"
+	"github.com/acmestack/gorm-plus/gplus"
 	"github.com/imroc/req/v3"
 	"github.com/kataras/iris/v12"
 )
+
+type IPagination struct {
+	Page  int `json:"page" form:"page"`
+	Limit int `json:"limit" form:"limit"`
+}
+
+func newPagination(pg ...int) *IPagination {
+	page, limit := 1, 20
+	if len(pg) >= 1 {
+		page = pg[0]
+		if len(pg) >= 2 {
+			limit = pg[1]
+		}
+	}
+	p := IPagination{
+		Page:  page,
+		Limit: limit,
+	}
+	return &p
+}
 
 func NewImportFormWithContext(ctx iris.Context) (*typekit.ImportDataForm, error) {
 	var form typekit.ImportDataForm
@@ -42,4 +63,18 @@ func NewImportDataWithContext(ctx iris.Context) (string, error) {
 func NewIDWithContext(ctx iris.Context) (string, bool) {
 	id := ctx.Params().Get("id")
 	return id, len(id) >= 1
+}
+
+func BuildPagination[T any](ctx iris.Context) (*gplus.Page[T], error) {
+	pg := newPagination()
+	if err := ctx.ReadBody(pg); err != nil {
+		return nil, err
+	}
+	query, _ := gplus.NewQuery[T]()
+	page := gplus.NewPage[T](pg.Page, pg.Limit)
+	page, gb := gplus.SelectPage(page, query)
+	if gb.Error != nil {
+		return nil, gb.Error
+	}
+	return page, nil
 }
