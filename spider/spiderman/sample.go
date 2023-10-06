@@ -97,14 +97,14 @@ func taskWrapper(sm *sync.Mutex, wg *sync.WaitGroup, idx int, cs *repos.MacCMSRe
 			} else {
 				task.SetFail(err.Error())
 			}
-			insertData(task, cs.ID)
+			insertData(task, cs)
 		}
 	}
 }
 
-func insertData(item *task, mid uint) {
+func insertData(item *task, cs *repos.MacCMSRepo) {
 	if !item.Successful {
-		idt := other.NewSpiderTask(mid, item.Page)
+		idt := other.NewSpiderTask(cs.ID, item.Page)
 		idt.SetFailed(item.Reason)
 		gplus.Insert[other.SpiderTask](idt)
 		logrus.Errorf("[task] 插入爬虫任务错误(页数: %d) 错误信息: %s", item.Page, item.Reason)
@@ -128,7 +128,8 @@ func insertData(item *task, mid uint) {
 				SpiderType: "maccms",
 				Title:      subItem.Name,
 				Desc:       subItem.Desc,
-				Mid:        mid,
+				Mid:        cs.ID,
+				R18:        cs.R18,
 				RealType:   subItem.Type,
 				RealID:     subItem.Id,
 				RealTime:   subItem.Last,
@@ -162,7 +163,7 @@ func insertData(item *task, mid uint) {
 			logrus.Errorln(err)
 		}
 	}
-	idt := other.NewSpiderTask(mid, item.Page)
+	idt := other.NewSpiderTask(cs.ID, item.Page)
 	msg := fmt.Sprintf("[task] 本次任务插入%d条数据 当前页数%d", len(*item.Videos), item.Page)
 	idt.SetSuccessful(msg)
 	gplus.Insert[other.SpiderTask](idt)
