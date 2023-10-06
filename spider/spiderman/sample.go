@@ -12,6 +12,7 @@ import (
 	"d1y.io/neovideo/models/other"
 	"d1y.io/neovideo/models/repos"
 	"d1y.io/neovideo/spider/implement/maccms"
+	"d1y.io/neovideo/sqls"
 	"github.com/acmestack/gorm-plus/gplus"
 	"github.com/google/uuid"
 	"github.com/imroc/req/v3"
@@ -80,15 +81,20 @@ func taskWrapper(sm *sync.Mutex, wg *sync.WaitGroup, idx int, cs *repos.MacCMSRe
 		defer sm.Unlock()
 		defer wg.Done()
 		defer ct.Increase()
-		logrus.Printf("[task] 开始爬取第%v任务", idx+1)
+		taskID, suf, ok /*理论来说 ok 是不应该存在的 */ := querySpiderTask(cs.ID, idx)
+		if ok && suf {
+			logrus.Printf("[task] 该任务已运行过(第%v页)", idx+1)
+			return
+		}
+		logrus.Printf("[task] 开始爬取第%v页任务", idx+1)
 		cms := maccms.New(cs.RespType, cs.Api)
 		task := newTask(idx)
 		data, err := cms.GetHome(idx + 1)
 		if err != nil {
-			logrus.Errorf("[task] 爬取第%v任务失败", idx+1)
+			logrus.Errorf("[task] 爬取第%v页任务失败", idx+1)
 			task.SetFail(err.Error())
 		} else {
-			logrus.Printf("[task] 爬取第%v任务成功, 共爬取到%v条数据", idx+1, len(data.Videos))
+			logrus.Printf("[task] 爬取第%v页任务成功, 共爬取到%v条数据", idx+1, len(data.Videos))
 			ids := make([]int, len(data.Videos))
 			for idx, item := range data.Videos {
 				ids[idx] = item.Id
@@ -100,13 +106,14 @@ func taskWrapper(sm *sync.Mutex, wg *sync.WaitGroup, idx int, cs *repos.MacCMSRe
 			} else {
 				task.SetFail(err.Error())
 			}
-			insertData(task, cs)
+			skipInsertSpiderTask := ok && !suf
+			insertData(task, cs, skipInsertSpiderTask, taskID)
 		}
 	}
 }
 
-func insertData(item *task, cs *repos.MacCMSRepo) {
-	if !item.Successful {
+func insertData(item *task, cs *repos.MacCMSRepo, skipInsertSpiderTask bool, taskID uint) {
+	if !item.Successful && !skipInsertSpiderTask {
 		idt := other.NewSpiderTask(cs.ID, item.Page)
 		idt.SetFailed(item.Reason)
 		gplus.Insert[other.SpiderTask](idt)
@@ -166,12 +173,39 @@ func insertData(item *task, cs *repos.MacCMSRepo) {
 			logrus.Errorln(err)
 		}
 	}
-	idt := other.NewSpiderTask(cs.ID, item.Page)
-	msg := fmt.Sprintf("[task] 本次任务插入%d条数据 当前页数%d", len(*item.Videos), item.Page)
-	idt.SetSuccessful(msg)
-	gplus.Insert[other.SpiderTask](idt)
-	logrus.Info(msg)
+	if !skipInsertSpiderTask {
+		idt := other.NewSpiderTask(cs.ID, item.Page)
+		msg := fmt.Sprintf("[task] 本次任务插入%d条数据 当前页数%d", len(*item.Videos), item.Page)
+		idt.SetSuccessful(msg)
+		gplus.Insert[other.SpiderTask](idt)
+		logrus.Info(msg)
+	} else {
+		if err := updateSpiderTaskWithSuccess(taskID); err != nil {
+			logrus.Errorf("[task] 更新爬虫任务状态(%d)失败%v", taskID, err)
+		} else {
+			logrus.Infof("[task] 更新爬虫任务状态(%d)成功", taskID)
+		}
+	}
 	wg.Wait()
+}
+
+func updateSpiderTaskWithSuccess(mid uint /*, page int*/) error {
+	return sqls.DB().Model(&other.SpiderTask{}).Where("id = ?", mid).UpdateColumn("successful", true).Error
+}
+
+func querySpiderTask(mid uint, idx int) (taskID uint, successful bool, ok bool) {
+	q, st := gplus.NewQuery[other.SpiderTask]()
+	q.Eq(&st.Mid, mid)
+	q.Eq(&st.Page, idx)
+	task, gb := gplus.SelectOne(q)
+	if gb.Error != nil { /* ignore error stack */
+		ok = false
+		return
+	}
+	ok = true
+	taskID = task.ID
+	successful = task.Successful
+	return
 }
 
 func createFilename(url string) string {
