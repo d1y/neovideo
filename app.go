@@ -60,6 +60,7 @@ func (na *NeovideoApp) initDB() {
 		panic(err)
 	}
 	sqls.AutoMigrate()
+	sqls.MigrateBatch()
 }
 
 func (na *NeovideoApp) GetDB() *sql.DB {
