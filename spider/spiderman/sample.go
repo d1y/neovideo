@@ -32,7 +32,10 @@ func Stop() int {
 }
 
 func IsStart() bool {
-	return pool.Running() >= 1 || ct.IsStart()
+	if pool != nil {
+		return pool.Running() >= 1
+	}
+	return ct.IsStart()
 }
 
 func Start(cs *repos.MacCMSRepo) (any, error) {
