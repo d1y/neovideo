@@ -35,7 +35,10 @@ func IsStart() bool {
 	return pool.Running() >= 1 || ct.IsStart()
 }
 
-func Start(rtype, api string, id uint) (any, error) {
+func Start(cs *repos.MacCMSRepo) (any, error) {
+	if len(cs.RespType) <= 0 || len(cs.Api) <= 0 {
+		return nil, errors.New("maccms repo api or type is empty")
+	}
 	if IsStart() {
 		return nil, ErrRepeatTask
 	}
@@ -46,7 +49,7 @@ func Start(rtype, api string, id uint) (any, error) {
 		return nil, err
 	}
 	defer pool.Release()
-	cms := maccms.New(rtype, api)
+	cms := maccms.New(cs.RespType, cs.Api)
 	homeData, err := cms.GetHome(1)
 	if err != nil {
 		return nil, err
@@ -62,20 +65,20 @@ func Start(rtype, api string, id uint) (any, error) {
 	for i := 0; i < count; i++ {
 		idx := i
 		wg.Add(1)
-		pool.Submit(taskWrapper(&sm, &wg, idx, rtype, api, id))
+		pool.Submit(taskWrapper(&sm, &wg, idx, cs))
 	}
 	wg.Wait()
 	return nil, nil
 }
 
-func taskWrapper(sm *sync.Mutex, wg *sync.WaitGroup, idx int, rt string, api string, id uint) func() {
+func taskWrapper(sm *sync.Mutex, wg *sync.WaitGroup, idx int, cs *repos.MacCMSRepo) func() {
 	return func() {
 		sm.Lock()
 		defer sm.Unlock()
 		defer wg.Done()
 		defer ct.Increase()
 		logrus.Printf("[task] 开始爬取第%v任务", idx+1)
-		cms := maccms.New(rt, api)
+		cms := maccms.New(cs.RespType, cs.Api)
 		task := newTask(idx)
 		data, err := cms.GetHome(idx + 1)
 		if err != nil {
@@ -87,21 +90,21 @@ func taskWrapper(sm *sync.Mutex, wg *sync.WaitGroup, idx int, rt string, api str
 			for idx, item := range data.Videos {
 				ids[idx] = item.Id
 			}
-			c := maccms.New(rt, api)
+			c := maccms.New(cs.RespType, cs.Api)
 			_, v, err := c.GetDetail(ids...)
 			if err == nil {
 				task.SetSuccessful(&v)
 			} else {
 				task.SetFail(err.Error())
 			}
-			insertData(task, id)
+			insertData(task, cs.ID)
 		}
 	}
 }
 
-func insertData(item *task, sid uint) {
+func insertData(item *task, mid uint) {
 	if !item.Successful {
-		idt := other.NewSpiderTask(sid, item.Page)
+		idt := other.NewSpiderTask(mid, item.Page)
 		idt.SetFailed(item.Reason)
 		gplus.Insert[other.SpiderTask](idt)
 		logrus.Errorf("[task] 插入爬虫任务错误(页数: %d) 错误信息: %s", item.Page, item.Reason)
@@ -115,7 +118,7 @@ func insertData(item *task, sid uint) {
 			cover = createFilename(subItem.Pic)
 			go func(url *string, filename *string, wg *sync.WaitGroup) {
 				if err := imageDownload(*url, *filename, wg); err != nil {
-					cv := other.NewCoverTask(*url, *filename)
+					cv := other.NewCoverTask(*url, *filename, err)
 					gplus.Insert(cv)
 				}
 			}(&subItem.Pic, &cover, &wg)
@@ -125,6 +128,8 @@ func insertData(item *task, sid uint) {
 				SpiderType: "maccms",
 				Title:      subItem.Name,
 				Desc:       subItem.Desc,
+				Mid:        mid,
+				RealType:   subItem.Type,
 				RealID:     subItem.Id,
 				RealTime:   subItem.Last,
 				RealCover:  subItem.Pic,
@@ -157,7 +162,7 @@ func insertData(item *task, sid uint) {
 			logrus.Errorln(err)
 		}
 	}
-	idt := other.NewSpiderTask(sid, item.Page)
+	idt := other.NewSpiderTask(mid, item.Page)
 	msg := fmt.Sprintf("[task] 本次任务插入%d条数据 当前页数%d", len(*item.Videos), item.Page)
 	idt.SetSuccessful(msg)
 	gplus.Insert[other.SpiderTask](idt)

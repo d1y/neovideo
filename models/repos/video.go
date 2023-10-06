@@ -22,6 +22,8 @@ type IVideo struct {
 	SpiderType string                              `json:"spider_type" gorm:"spider_type"` // 爬虫类型(TODO: 1=> maccms)
 	Title      string                              `json:"title" gorm:"title"`             // 标题
 	Desc       string                              `json:"desc" gorm:"desc"`               // 描述
+	Mid        uint                                `json:"mid" gorm:"mid"`                 // [maccms] id(方便关联起来)
+	RealType   string                              `json:"real_type" gorm:"real_type"`     // 分类名称
 	RealID     int                                 `json:"real_id:unique" gorm:"real_id"`  // 真实的id
 	RealTime   time.Time                           `json:"real_time" gorm:"real_time"`     // 真实的更新(创建)时间
 	RealCover  string                              `json:"real_cover" gorm:"real_cover"`   // 真实的封面

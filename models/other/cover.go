@@ -13,6 +13,7 @@ import (
 type IImageCover struct {
 	URL      string `json:"url" gorm:"url"`
 	Filename string `json:"filename" gorm:"filename"`
+	Reason   string `json:"reason" gorm:"reason"`
 }
 
 type ImageCoverTask struct {
@@ -24,11 +25,12 @@ func (icd *ImageCoverTask) TableName() string {
 	return "t_cover_task"
 }
 
-func NewCoverTask(img string, filename string) *ImageCoverTask {
+func NewCoverTask(img string, filename string, err error) *ImageCoverTask {
 	return &ImageCoverTask{
 		IImageCover: IImageCover{
 			URL:      img,
 			Filename: filename,
+			Reason:   err.Error(),
 		},
 	}
 }

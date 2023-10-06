@@ -320,7 +320,7 @@ func (im *IMacCMSController) startSpider(ctx iris.Context) {
 		web.NewError(gb.Error).Build(ctx)
 		return
 	}
-	go spiderman.Start(val.RespType, val.Api, val.ID)
+	go spiderman.Start(val)
 	web.NewMessage("已开启爬虫任务").Build(ctx)
 }
 
