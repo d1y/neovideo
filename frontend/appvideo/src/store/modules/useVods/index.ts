@@ -1,7 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { Category, VodItem } from '@/api/types'
-import { getHome } from '@/api/vod'
 
 export default defineStore("vods", () => {
   const map = ref(new Map<number, VodItem>)
@@ -16,7 +15,7 @@ export default defineStore("vods", () => {
 
   async function loadVodHomeDataWithApi(beforeCheck = true) {
     if (map.value.size) return
-    setVodData(await getHome())
+    // FIXME: remove this
   }
 
   const menus = computed<{

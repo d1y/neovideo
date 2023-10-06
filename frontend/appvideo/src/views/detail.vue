@@ -8,7 +8,7 @@
       </div>
       <div class="right">
         <h3>{{ $t('Pages.playUrl') }}</h3>
-        <template v-for="item in (vodData?.dd || [])">
+        <template v-for="item in (vodData?.videos || [])">
           <div class="p-list">
             <div class="p-item" :class="{ active: currentPlayFlag == item.flag }">{{ item.flag }}</div>
           </div>
@@ -24,13 +24,13 @@
 
     <div class="content-wrap">
       <div class="meta-wrap">
-        <h1 class="title">{{ vodData?.name }}</h1>
+        <h1 class="title">{{ vodData?.title }}</h1>
         <div class="category"
           >{{ vodData?.lang }} / {{ vodData?.area }} /
           {{ vodData?.year }}
         </div>
         <div class="info-wrap">
-          <img v-lazy="vodData?.pic" />
+          <img v-lazy="vodData?.real_cover" />
           <div class="info">
             <div v-if="vodData?.director" class="info-item">{{ $t('Pages.director') }}: {{ vodData?.director }}</div>
             <div v-if="vodData?.actor" class="info-item">{{ $t('Pages.actors') }}: {{ vodData?.actor }}</div>
@@ -44,33 +44,29 @@
   </div>
 </template>
 <script setup lang="ts">
-import { getDetail } from '@/api/maccms'
-import { DataVideo } from '@/api/types'
+import { getDetail } from '@/api/vod'
+import { VideoInfo } from '@/api/types'
 import Header from '@/views/components/header.vue'
 
 import TCPlayer from 'tcplayer.js'
 import 'tcplayer.js/dist/tcplayer.min.css'
 
-const props = defineProps<{
-  id: string
-  mid: string
-}>()
+const props = defineProps<{ id: string }>()
 
 const currentLink = ref('')
 const currentPlayFlag = ref('')
 
-const vodData = ref<DataVideo>()
+const vodData = ref<VideoInfo>()
 
 let player: any = undefined
 onMounted(async () => {
   player = TCPlayer('player-box', {})
   await getData()
-  if (!!vodData.value && vodData.value.dd && vodData.value.dd.length >= 1) {
-    const item = vodData.value.dd[0]
-    if (!!item.videos.length) {
-      currentPlayFlag.value = item.flag
-      startPlay(item.videos[0].url)
-    }
+  if (vodData.value && vodData.value.videos.length) {
+    const vd = vodData.value.videos[0]
+    const link = vd.videos[0].url
+    currentPlayFlag.value = vd.flag
+    startPlay(link)
   }
 })
 
@@ -80,7 +76,7 @@ const startPlay = (link) => {
 }
 
 const getData = async function () {
-  const data = await getDetail(props.mid, props.id)
+  const data = await getDetail(props.id)
   vodData.value = data
 }
 </script>

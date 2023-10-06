@@ -1,44 +1,40 @@
 <template>
   <div>
-    <template v-for="item in data">
+    <!-- <template v-for="item in data"> -->
       <div class="header">
-        <h3>{{ item.name }}</h3>
+        <h3>{{ "demo" }}</h3>
         <a class="more">更多</a>
       </div>
 
       <div class="lvideo-list">
-        <a class="video-item" :href="handleDetail(subItem.id, item.id)" v-for="subItem in item.data.videos">
+        <a class="video-item" :href="handleDetail(subItem.id)" v-for="subItem in data">
           <div class="cover-wrap">
-            <img v-lazy="subItem.pic" />
+            <img v-lazy="subItem.real_cover" />
             <span class="remarks">{{ subItem.desc }}</span>
           </div>
           <div class="meta-wrap">
-            <div class="title">{{ subItem.name }}</div>
-            <div class="info">{{ subItem.last }}更新</div>
+            <div class="title">{{ subItem.title }}</div>
+            <div class="info">{{ subItem.real_time }}更新</div>
           </div>
         </a>
       </div>
-    </template>
+    <!-- </template> -->
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { getHome } from '@/api/vod'
-import { VodItem } from '@/api/types'
-import useVods from '@/store/modules/useVods'
+import { getVideos } from '@/api/vod'
+import { VideoInfo } from '@/api/types'
 
-const { setVodData } = useVods()
-
-const data = ref<VodItem[]>()
+const data = ref<VideoInfo[]>()
 const getData = async function () {
-  const vodhome = await getHome()
-  setVodData(vodhome)
-  data.value = vodhome
+  const vodhome = await getVideos()
+  data.value = vodhome.Records
 }
 onMounted(getData)
-const handleDetail = (vod_id: number, mid: number | string) => {
-  return `/detail/${vod_id}?mid=${mid}`
+function handleDetail(mid: number | string) {
+  return `/detail/${mid}`
 }
 </script>
 

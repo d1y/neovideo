@@ -1,7 +1,16 @@
 import http from '@/utils/http'
-import { VodHome, VodItem } from "./types"
+import { ApiResult, IPaginationResult, VideoInfo } from "./types"
 
-export async function getHome(): Promise<VodItem[]> {
-  const data = ((await http.get<VodHome>("/vod/home")).data).data
-  return data
+export async function getVideos(page = 1, limit = 20): Promise<IPaginationResult<VideoInfo>> {
+  const data = (await http.request<ApiResult<IPaginationResult<VideoInfo>>>({
+    url: "/vod/videos",
+    method: "get",
+    params: { page, limit }
+  })).data
+  return data.data
+}
+
+export async function getDetail(id: number | string): Promise<VideoInfo> {
+  const data = (await http.get<ApiResult<VideoInfo>>(`/vod/video/${id}`)).data
+  return data.data
 }

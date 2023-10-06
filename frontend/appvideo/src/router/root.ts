@@ -39,8 +39,7 @@ const constantRouterMap: RouteRecordRaw[] = [
     name: 'detail',
     component: () => import('@/views/detail.vue'),
     props: (route) => ({
-      id: route.params.id,
-      mid: route.query.mid as string,
+      id: route.params.id
     })
   },
 ]
