@@ -65,12 +65,17 @@ func NewIDWithContext(ctx iris.Context) (string, bool) {
 	return id, len(id) >= 1
 }
 
-func BuildPagination[T any](ctx iris.Context) (*gplus.Page[T], error) {
+func BuildPagination[T any](ctx iris.Context, q ...*gplus.QueryCond[T]) (*gplus.Page[T], error) {
 	pg := newPagination()
 	if err := ctx.ReadBody(pg); err != nil {
 		return nil, err
 	}
-	query, _ := gplus.NewQuery[T]()
+	var query *gplus.QueryCond[T]
+	if len(q) >= 1 {
+		query = q[0]
+	} else {
+		query, _ = gplus.NewQuery[T]()
+	}
 	page := gplus.NewPage[T](pg.Page, pg.Limit)
 	page, gb := gplus.SelectPage(page, query)
 	if gb.Error != nil {

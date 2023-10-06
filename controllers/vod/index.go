@@ -24,7 +24,9 @@ func newVod() *IVodController {
 }
 
 func (ic *IVodController) getVideos(ctx iris.Context) {
-	data, err := handler.BuildPagination[repos.VideoRepo](ctx)
+	query, ml := gplus.NewQuery[repos.VideoRepo]()
+	query.Eq(&ml.R18, 0) // TODO: 支持控制显示 r18 内容(默认不显示)
+	data, err := handler.BuildPagination[repos.VideoRepo](ctx, query)
 	if err != nil {
 		web.NewError(err).Build(ctx)
 		return
@@ -35,6 +37,7 @@ func (ic *IVodController) getVideos(ctx iris.Context) {
 func (ic *IVodController) getDetail(ctx iris.Context) {
 	id, _ := handler.NewIDWithContext(ctx)
 	result, gb := gplus.SelectById[repos.VideoRepo](id)
+	// FIXME: 内容不显示r18内容
 	if gb.Error != nil {
 		web.NewError(gb.Error).Build(ctx)
 		return
