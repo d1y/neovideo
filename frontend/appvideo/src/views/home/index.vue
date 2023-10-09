@@ -1,23 +1,23 @@
 <template>
   <div>
     <!-- <template v-for="item in data"> -->
-      <div class="header">
-        <h3>{{ "demo" }}</h3>
-        <a class="more">更多</a>
-      </div>
+    <div class="header">
+      <h3>{{ "demo" }}</h3>
+      <a class="more">更多</a>
+    </div>
 
-      <div class="lvideo-list">
-        <a class="video-item" :href="handleDetail(subItem.id)" v-for="subItem in data">
-          <div class="cover-wrap">
-            <img v-lazy="subItem.real_cover" />
-            <span class="remarks">{{ subItem.desc }}</span>
-          </div>
-          <div class="meta-wrap">
-            <div class="title">{{ subItem.title }}</div>
-            <div class="info">{{ subItem.real_time }}更新</div>
-          </div>
-        </a>
-      </div>
+    <div class="lvideo-list">
+      <a class="video-item" :href="handleDetail(subItem.id)" v-for="subItem in data">
+        <div class="cover-wrap">
+          <img v-lazy="subItem.real_cover" />
+          <span class="remarks">{{ subItem.real_type }}</span>
+        </div>
+        <div class="meta-wrap">
+          <div class="title">{{ subItem.title }}</div>
+          <div class="info">{{ subItem.real_time }}更新</div>
+        </div>
+      </a>
+    </div>
     <!-- </template> -->
   </div>
 </template>

@@ -4,36 +4,36 @@
 
     <div class="player-wrap">
       <div class="left">
-        <video id="player-box"></video>
+        <div ref="videoRef" v-if="!currentVideo?.embed"></div>
+        <iframe v-else :src="currentVideo?.url"></iframe>
       </div>
       <div class="right">
         <h3>{{ $t('Pages.playUrl') }}</h3>
-        <template v-for="item in (vodData?.videos || [])">
-          <div class="p-list">
-            <div class="p-item" :class="{ active: currentPlayFlag == item.flag }">{{ item.flag }}</div>
+        <div class="p-list">
+          <div class="p-item p-flag" :class="{ active: currentPlayFlag == item }" @click="handleChangeCurrentFlag(item)"
+            v-for="item in videoFlags">{{ item }}</div>
+        </div>
+        <div style="margin: 12px; width: 100%;height: 2px; background-color: rgba(0,0,0,.1);"></div>
+        <div class="p-list">
+          <div class="p-item" :class="{ active: item.url == currentVideo?.url }" v-for="item in currentVideos"
+            @click="startPlay(item)">
+            {{ item.name }}
           </div>
-          <div style="margin: 12px; width: 100%;height: 2px; background-color: rgba(0,0,0,.1);"></div>
-          <div class="p-list">
-            <div class="p-item" :class="{ active: i.url == currentLink }" v-for="i in item.videos" @click="startPlay(i.url)">
-              {{ i.name }}
-            </div>
-          </div>
-        </template>
+        </div>
       </div>
     </div>
 
     <div class="content-wrap">
       <div class="meta-wrap">
         <h1 class="title">{{ vodData?.title }}</h1>
-        <div class="category"
-          >{{ vodData?.lang }} / {{ vodData?.area }} /
-          {{ vodData?.year }}
-        </div>
         <div class="info-wrap">
           <img v-lazy="vodData?.real_cover" />
           <div class="info">
             <div v-if="vodData?.director" class="info-item">{{ $t('Pages.director') }}: {{ vodData?.director }}</div>
             <div v-if="vodData?.actor" class="info-item">{{ $t('Pages.actors') }}: {{ vodData?.actor }}</div>
+            <div class="category">{{ vodData?.lang }} / {{ vodData?.area }} /
+              {{ vodData?.year }}
+            </div>
           </div>
         </div>
       </div>
@@ -45,43 +45,111 @@
 </template>
 <script setup lang="ts">
 import { getDetail } from '@/api/vod'
-import { VideoInfo } from '@/api/types'
+import { VideoInfo, VideoVideo } from '@/api/types'
 import Header from '@/views/components/header.vue'
 
-import TCPlayer from 'tcplayer.js'
-import 'tcplayer.js/dist/tcplayer.min.css'
+import xgplayer from 'xgplayer'
+import HlsPlugin from 'xgplayer-hls'
+import 'xgplayer/dist/index.min.css';
 
 const props = defineProps<{ id: string }>()
 
-const currentLink = ref('')
+const videoRef = ref<any>()
+let xgplayerInstance: xgplayer
+
+const currentVideo = ref<VideoVideo>()
 const currentPlayFlag = ref('')
+
+watch(currentVideo, _ => {
+  xgplayerInstance && xgplayerInstance.destroy()
+})
 
 const vodData = ref<VideoInfo>()
 
-let player: any = undefined
+const videoMap = computed(() => {
+  const m = new Map<string, VideoVideo[]>()
+  const videos = vodData.value?.videos || []
+  if (!videos.length) return m
+  videos.forEach(item => {
+    m.set(item.flag, item.videos)
+  })
+  return m
+})
+
+const videoFlags = computed(() => {
+  if (videoMap.value.size == 0) return []
+  return Array.from(videoMap.value.keys())
+})
+
+const currentVideos = computed(() => {
+  if (videoMap.value.size == 0) return []
+  const videos = videoMap.value.get(currentPlayFlag.value)
+  return videos
+})
+
 onMounted(async () => {
-  player = TCPlayer('player-box', {})
   await getData()
   if (vodData.value && vodData.value.videos.length) {
     const vd = vodData.value.videos[0]
-    const link = vd.videos[0].url
+    const onceVideo = vd.videos[0]
     currentPlayFlag.value = vd.flag
-    startPlay(link)
+    startPlay(onceVideo)
   }
 })
 
-const startPlay = (link) => {
-  currentLink.value = link
-  player.src(currentLink.value)
+const startPlay = async (video: VideoVideo) => {
+  currentVideo.value = video
+  if (!video.embed) {
+    await nextTick()
+    if (xgplayerInstance) {
+      xgplayerInstance.destroy()
+    }
+    const $0 = videoRef.value
+    xgplayerInstance = new xgplayer({
+      el: $0,
+      width: '100%',
+      height: '420px',
+      isLive: false,
+      poster: vodData.value!.real_cover,
+      pip: true,
+      screenShot: true,
+      cssFullscreen: true,
+      videoTitle: true,
+      showList: true,
+      showHistory: true,
+      quitMiniMode: true,
+      closeVideoTouch: true,
+      commonStyle: {
+        progressColor: '#fff',
+        playedColor: '#06aeec',
+      },
+      // ignores: ['replay', 'error'],
+      plugins: [
+        HlsPlugin,
+      ],
+      url: video.url,
+      autoplay: true,
+    })
+  }
 }
 
 const getData = async function () {
   const data = await getDetail(props.id)
   vodData.value = data
 }
+
+function handleChangeCurrentFlag(flag: string) {
+  if (flag == currentPlayFlag.value) return
+  const idx = currentVideos.value!.findIndex(item => item.url == currentVideo.value?.url)
+  if (idx <= -1) return
+  currentPlayFlag.value = flag
+  const curr = currentVideos.value![idx] // FIXME: null check(index out of range)
+  startPlay(curr)
+}
 </script>
 <style scoped lang="less">
 @media screen and (min-width: 1px) and (max-width: 768px) {
+
   // 播放器相关
   #player-box {
     height: 220px !important;
@@ -93,6 +161,7 @@ const getData = async function () {
 }
 
 @media screen and (min-width: 768px) {
+
   // 播放器相关
   #player-box {
     height: 480px !important;
@@ -109,6 +178,11 @@ ol,
 ul {
   margin-bottom: 0px;
   margin-top: 0;
+}
+
+iframe {
+  width: 100%;
+  min-height: 42vh;
 }
 
 .detail {
@@ -164,6 +238,13 @@ ul {
         white-space: nowrap;
       }
 
+      .p-flag {
+        font-size: 18px;
+        border-radius: 12px;
+        background-color: #333;
+        color: #fff;
+      }
+
       .active {
         color: #fe3355;
       }
@@ -181,8 +262,6 @@ ul {
   gap: 16px;
 
   .meta-wrap {
-    //padding-left: 12px;
-    //padding-right: 12px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -194,7 +273,6 @@ ul {
 
     .category {
       padding-bottom: 16px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
       color: #606266;
       font-size: 14px;
     }
