@@ -3,8 +3,8 @@ package spiderman
 import (
 	"errors"
 	"fmt"
-	"sync"
 
+	"d1y.io/neovideo/common/safeint"
 	"d1y.io/neovideo/spider/implement/maccms"
 	"github.com/panjf2000/ants/v2"
 )
@@ -21,74 +21,58 @@ var pool *ants.Pool
 // 则最多要 poolSize * 3 秒任务才会暂停 :)
 const poolSize = 6
 
-type Counter struct {
-	sm      sync.RWMutex
-	count   int
-	current int
+type ICounter struct {
+	current *safeint.SafeInt
+	count   *safeint.SafeInt
 }
 
-func (ct *Counter) Padding() {
-	ct.sm.Lock()
-	defer ct.sm.Unlock()
-	ct.count = 0
-	ct.current = 0
+func (c *ICounter) Padding() {
+	c.current.SetZero()
+	c.count.SetZero()
 }
 
-func (ct *Counter) SetCount(count int) {
-	ct.sm.Lock()
-	defer ct.sm.Unlock()
-	ct.count = count
+func (c *ICounter) SetCount(count int) {
+	c.count.Set(count)
 }
 
-func (ct *Counter) Increase() {
-	ct.sm.Lock()
-	defer ct.sm.Unlock()
-	ct.current++
+func (c *ICounter) Increase() {
+	c.current.Add(1)
 }
 
-func (ct *Counter) Reset() {
-	ct.sm.Lock()
-	defer ct.sm.Unlock()
-	ct.count = -1
-	ct.current = -1
+func (c *ICounter) Reset() {
+	c.count.Set(-1)
+	c.current.Set(-1)
 }
 
-func (ct *Counter) GetCount() int {
-	ct.sm.RLock()
-	defer ct.sm.RUnlock()
-	return ct.count
+func (c *ICounter) GetCount() int {
+	return c.count.Get()
 }
 
-func (ct *Counter) GetCurrent() int {
-	ct.sm.RLock()
-	defer ct.sm.RUnlock()
-	return ct.current
+func (c *ICounter) GetCurrent() int {
+	return c.current.Get()
 }
 
-func (ct *Counter) String() string {
-	if ct.GetCurrent() == 0 && ct.GetCount() == 0 {
+func (c *ICounter) String() string {
+	if c.GetCurrent() == 0 && c.GetCount() == 0 {
 		return "任务准备中(或已失败)"
 	}
-	var msg = fmt.Sprintf("%d/%d(协程数量%d)", ct.GetCurrent(), ct.GetCount(), pool.Running())
+	var msg = fmt.Sprintf("%d/%d(协程数量%d)", c.GetCurrent(), c.GetCount(), pool.Running())
 	return msg
 }
 
-func (ct *Counter) IsStart() bool {
-	ct.sm.Lock()
-	defer ct.sm.Unlock()
-	if ct.count == -1 || ct.current == -1 {
+func (c *ICounter) IsStart() bool {
+	if c.count.Get() == -1 || c.current.Get() == -1 {
 		return false
 	}
-	if ct.count == 0 && ct.current == 0 {
+	if c.count.Get() == 0 && c.current.Get() == 0 {
 		return true
 	}
-	return ct.count >= ct.current
+	return c.count.Get() >= c.current.Get()
 }
 
-var ct = Counter{
-	count:   -1,
-	current: -1,
-	sm:      sync.RWMutex{},
+var ct = &ICounter{
+	current: safeint.New(-1),
+	count:   safeint.New(-1),
 }
 
 type task struct {
