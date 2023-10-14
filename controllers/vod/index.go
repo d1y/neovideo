@@ -24,8 +24,19 @@ func newVod() *IVodController {
 }
 
 func (ic *IVodController) getVideos(ctx iris.Context) {
+	type qs struct {
+		Category string `json:"category" form:"category"`
+	}
+	var q qs
+	if err := ctx.ReadBody(&q); err != nil {
+		web.NewError(err).Build(ctx)
+		return
+	}
 	query, ml := gplus.NewQuery[repos.VideoRepo]()
 	query.Eq(&ml.R18, 0) // TODO: 支持控制显示 r18 内容(默认不显示)
+	if len(q.Category) >= 1 {
+		query.Eq(&ml.RealType, q.Category)
+	}
 	data, err := handler.BuildPagination[repos.VideoRepo](ctx, query)
 	if err != nil {
 		web.NewError(err).Build(ctx)
