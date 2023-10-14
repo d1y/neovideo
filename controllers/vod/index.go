@@ -45,11 +45,24 @@ func (ic *IVodController) getDetail(ctx iris.Context) {
 	web.NewData(result).Build(ctx)
 }
 
+func (ic *IVodController) getCategorys(ctx iris.Context) {
+	query, ml := gplus.NewQuery[repos.VideoCategoryRepo]()
+	query.Eq(&ml.R18, 0) // TODO: 支持控制显示 r18 内容(默认不显示)
+	list, gb := gplus.SelectList[repos.VideoCategoryRepo](query)
+	if gb.Error != nil {
+		web.NewError(gb.Error).Build(ctx)
+		return
+	}
+	web.NewData(list).Build(ctx)
+}
+
 func Register(u iris.Party) {
 	vod := newVod()
 
 	// Deprecated: remove this
 	u.Get("/home", vod.renderHome).Name = "代理访问首页"
+
+	u.Get("/category", vod.getCategorys)
 
 	u.Get("/videos", vod.getVideos).Name = "获取视频"
 	u.Get("/video/{id:uint}", vod.getDetail).Name = "获取视频详情"
