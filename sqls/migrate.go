@@ -9,7 +9,7 @@ import (
 )
 
 func AutoMigrate() {
-	if err := db.AutoMigrate(&repos.MacCMSRepo{}, &repos.JiexiRepo{}, &repos.VideoRepo{}, &other.ImageCoverTask{}, &other.SpiderTask{}); err != nil {
+	if err := db.AutoMigrate(&repos.MacCMSRepo{}, &repos.JiexiRepo{}, &repos.VideoRepo{}, &repos.VideoCategoryRepo{}, &other.ImageCoverTask{}, &other.SpiderTask{}); err != nil {
 		panic(err)
 	}
 }
@@ -62,6 +62,46 @@ func MigrateBatch() {
 	// 			tx.Model(&video).UpdateColumn("cover", cover)
 	// 		}
 	// 		return nil
+	// 	},
+	// },
+	// {
+	// 	ID: "202310141639",
+	// 	Migrate: func(tx *gorm.DB) error {
+	// 		var videos []repos.VideoRepo
+	// 		if err := tx.Debug().Model(&repos.VideoRepo{}).Where("1 = 1").Find(&videos).Error; err != nil {
+	// 			return err
+	// 		}
+	// 		return tx.Transaction(func(tx *gorm.DB) error {
+	// 			for _, video := range videos {
+	// 				maccmsID, rtype, r18 := video.Mid, video.RealType, video.R18
+	// 				var category repos.VideoCategoryRepo
+	// 				var sk = tx.Debug().Model(&repos.VideoCategoryRepo{}).Where("name = ?", rtype).First(&category)
+	// 				if err := sk.Error; err != nil {
+	// 					if errors.Is(err, gorm.ErrRecordNotFound) {
+	// 						cate := repos.VideoCategoryRepo{
+	// 							IVideoCategory: repos.IVideoCategory{
+	// 								Name:    rtype,
+	// 								R18:     r18,
+	// 								Sources: datatypes.NewJSONSlice([]uint{maccmsID}),
+	// 							},
+	// 						}
+	// 						tx.Debug().Save(&cate)
+	// 					}
+	// 				} else {
+	// 					var fd = false
+	// 					for _, source := range category.Sources {
+	// 						if source == maccmsID {
+	// 							fd = true
+	// 						}
+	// 					}
+	// 					if !fd {
+	// 						category.Sources = append(category.Sources, maccmsID)
+	// 						tx.Debug().Save(&category)
+	// 					}
+	// 				}
+	// 			}
+	// 			return nil
+	// 		})
 	// 	},
 	// },
 	}).Migrate()
