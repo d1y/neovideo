@@ -127,7 +127,8 @@ func insertData(item *task, cs *repos.MacCMSRepo, skipInsertSpiderTask bool, tas
 			wg.Add(1)
 			cover = createFilename(subItem.Pic)
 			go func(url *string, filename *string, wg *sync.WaitGroup) {
-				if err := imageDownload(*url, *filename, wg); err != nil {
+				fullpath := filepath.Join(constant.Public, *filename)
+				if err := imageDownload(*url, fullpath, wg); err != nil {
 					cv := other.NewCoverTask(*url, *filename, err)
 					gplus.Insert(cv)
 				}
@@ -211,10 +212,9 @@ func querySpiderTask(mid uint, idx int) (taskID uint, successful bool, ok bool) 
 func createFilename(url string) string {
 	ext := filepath.Ext(url)
 	uuid := uuid.New()
-	filename := uuid.String()
-	filename += ext
-	path := filepath.Join(constant.Public, filename)
-	return path
+	file := uuid.String()
+	file += ext
+	return file
 }
 
 func imageDownload(url string, filename string, wg *sync.WaitGroup) error {

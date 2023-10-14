@@ -9,7 +9,7 @@
     <div class="lvideo-list">
       <a class="video-item" :href="handleDetail(subItem.id)" v-for="subItem in data">
         <div class="cover-wrap">
-          <img v-lazy="subItem.real_cover" />
+          <img v-lazy="'/public/' + subItem.cover" />
           <span class="remarks">{{ subItem.real_type }}</span>
         </div>
         <div class="meta-wrap">

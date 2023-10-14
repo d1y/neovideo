@@ -93,6 +93,7 @@ func (na *NeovideoApp) Register() {
 		u.PartyFunc("/jiexi", jiexiControllers.Register)
 		u.PartyFunc("/vod", vodControllers.Register)
 	})
+	na.App.HandleDir("/public", constant.Public)
 }
 
 func (na *NeovideoApp) getPort() string {

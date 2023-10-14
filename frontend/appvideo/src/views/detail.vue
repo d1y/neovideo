@@ -27,7 +27,7 @@
       <div class="meta-wrap">
         <h1 class="title">{{ vodData?.title }}</h1>
         <div class="info-wrap">
-          <img v-lazy="vodData?.real_cover" />
+          <img v-lazy="'/public/' + vodData?.cover" />
           <div class="info">
             <div v-if="vodData?.director" class="info-item">{{ $t('Pages.director') }}: {{ vodData?.director }}</div>
             <div v-if="vodData?.actor" class="info-item">{{ $t('Pages.actors') }}: {{ vodData?.actor }}</div>
@@ -110,7 +110,7 @@ const startPlay = async (video: VideoVideo) => {
       width: '100%',
       height: '420px',
       isLive: false,
-      poster: vodData.value!.real_cover,
+      poster: vodData.value!.cover,
       pip: true,
       screenShot: true,
       cssFullscreen: true,

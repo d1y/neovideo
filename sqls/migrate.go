@@ -49,5 +49,20 @@ func MigrateBatch() {
 	// 		return nil
 	// 	},
 	// },
+	// {
+	// 	ID: "202310141306",
+	// 	Migrate: func(tx *gorm.DB) error {
+	// 		var videos []repos.VideoRepo
+	// 		if err := tx.Model(&repos.VideoRepo{}).Where("1 = 1").Find(&videos).Error; err != nil {
+	// 			return err
+	// 		}
+	// 		for _, video := range videos {
+	// 			cover := strings.Replace(video.Cover, "public/", "", -1)
+	// 			fmt.Println("video cover current replace to ", cover)
+	// 			tx.Model(&video).UpdateColumn("cover", cover)
+	// 		}
+	// 		return nil
+	// 	},
+	// },
 	}).Migrate()
 }

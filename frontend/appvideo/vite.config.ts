@@ -48,6 +48,7 @@ export default ({ command }: ConfigEnv): UserConfig => {
       https: false, // 禁用https
       proxy: {
         '/api': 'http://localhost:3000',
+        '/public': 'http://localhost:3000',
       },
     },
   }
