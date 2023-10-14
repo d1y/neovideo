@@ -122,6 +122,21 @@ func insertData(item *task, cs *repos.MacCMSRepo, skipInsertSpiderTask bool, tas
 	}
 	var wg sync.WaitGroup
 	for _, subItem := range *item.Videos {
+		var video repos.VideoRepo
+		if err := sqls.DB().Where(&repos.VideoRepo{
+			IVideo: repos.IVideo{
+				Mid:    cs.ID,
+				RealID: subItem.Id,
+			},
+		}).Find(&video).Error; err == nil {
+			video.Videos = maccmsDD2Videos(subItem.DD)
+			if err := sqls.DB().Save(&video).Error; err != nil {
+				logrus.Errorf("[task] 更新数据失败(%d): %v", video.ID, err)
+			} else {
+				logrus.Printf("[task] 更新数据成功(%d)", video.ID)
+			}
+			continue
+		}
 		cover := ""
 		if len(subItem.Pic) >= 1 {
 			wg.Add(1)
@@ -134,43 +149,8 @@ func insertData(item *task, cs *repos.MacCMSRepo, skipInsertSpiderTask bool, tas
 				}
 			}(&subItem.Pic, &cover, &wg)
 		}
-		var value = repos.VideoRepo{
-			IVideo: repos.IVideo{
-				SpiderType: "maccms",
-				Title:      subItem.Name,
-				Desc:       subItem.Desc,
-				Mid:        cs.ID,
-				R18:        cs.R18,
-				RealType:   subItem.Type,
-				RealID:     subItem.Id,
-				RealTime:   subItem.Last,
-				RealCover:  subItem.Pic,
-				Cover:      cover,
-				CategoryID: subItem.Tid,
-				Lang:       subItem.Lang,
-				Area:       subItem.Area,
-				Year:       subItem.Year,
-				State:      subItem.State,
-				Actor:      subItem.Actor,
-				Director:   subItem.Director,
-			},
-		}
-		var videos = make([]repos.IVideoDataInfo, 0)
-		for _, d := range subItem.DD {
-			var vc = repos.IVideoDataInfo{
-				Flag: d.Flag,
-			}
-			for _, dv := range d.Videos {
-				vc.Videos = append(vc.Videos, repos.IVideoData{
-					Name:  dv.Name,
-					URL:   dv.URL,
-					Embed: dv.Embed,
-				})
-			}
-			videos = append(videos, vc)
-		}
-		value.Videos = datatypes.NewJSONSlice[repos.IVideoDataInfo](videos)
-		if err := gplus.Insert[repos.VideoRepo](&value).Error; err != nil { /* 忽略这里的错误 */
+		v := maccmsItem2video(cs, &subItem, cover)
+		if err := gplus.Insert[repos.VideoRepo](v).Error; err != nil {
 			logrus.Errorln(err)
 		}
 	}
@@ -188,6 +168,51 @@ func insertData(item *task, cs *repos.MacCMSRepo, skipInsertSpiderTask bool, tas
 		}
 	}
 	wg.Wait()
+}
+
+func maccmsItem2video(cs *repos.MacCMSRepo, subItem *maccms.IMacCMSListVideoItem, cover string) *repos.VideoRepo {
+	var value = repos.VideoRepo{
+		IVideo: repos.IVideo{
+			SpiderType: "maccms",
+			Title:      subItem.Name,
+			Desc:       subItem.Desc,
+			Mid:        cs.ID,
+			R18:        cs.R18,
+			RealType:   subItem.Type,
+			RealID:     subItem.Id,
+			RealTime:   subItem.Last,
+			RealCover:  subItem.Pic,
+			Cover:      cover,
+			CategoryID: subItem.Tid,
+			Lang:       subItem.Lang,
+			Area:       subItem.Area,
+			Year:       subItem.Year,
+			State:      subItem.State,
+			Actor:      subItem.Actor,
+			Director:   subItem.Director,
+		},
+	}
+	value.Videos = maccmsDD2Videos(subItem.DD)
+	return &value
+}
+
+func maccmsDD2Videos(dd []maccms.IMacCMSVideoDDTag) datatypes.JSONSlice[repos.IVideoDataInfo] {
+	var videos = make([]repos.IVideoDataInfo, len(dd))
+	for index, d := range dd {
+		var vc = repos.IVideoDataInfo{
+			Flag:   d.Flag,
+			Videos: make([]repos.IVideoData, len(d.Videos)),
+		}
+		for idx, dv := range d.Videos {
+			vc.Videos[idx] = repos.IVideoData{
+				Name:  dv.Name,
+				URL:   dv.URL,
+				Embed: dv.Embed,
+			}
+		}
+		videos[index] = vc
+	}
+	return datatypes.NewJSONSlice[repos.IVideoDataInfo](videos)
 }
 
 func updateSpiderTaskWithSuccess(mid uint /*, page int*/) error {
