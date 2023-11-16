@@ -25,9 +25,9 @@ var group18 = []string{
 
 func gjsonGGGetString(g gjson.Result, s ...string) (string, error) {
 	for _, v := range s {
-		s := g.Get(v).String()
-		if len(s) >= 1 {
-			return s, nil
+		str := g.Get(v).String()
+		if len(str) >= 1 {
+			return str, nil
 		}
 	}
 	return "", errors.New("not match")
