@@ -3,12 +3,12 @@ package impl
 import (
 	"errors"
 	"regexp"
+	"slices"
 	"strings"
 
 	"d1y.io/neovideo/common/json"
 	"d1y.io/neovideo/spider/implement/maccms"
 	"github.com/tidwall/gjson"
-	"golang.org/x/exp/slices"
 )
 
 var jiexiURLFuzzyReg = regexp.MustCompile(`(?i)(jiexi|jiexiurl|url)?=`)

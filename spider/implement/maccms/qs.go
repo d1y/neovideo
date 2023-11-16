@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
 	"d1y.io/neovideo/spider/axios"
 	"github.com/imroc/req/v3"
-	"golang.org/x/exp/slices"
 )
 
 const (
