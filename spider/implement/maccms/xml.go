@@ -70,7 +70,7 @@ func (m *IMacCMS) xmlGetURL2XMLDocumentWithRoot(url string) (*etree.Element, err
 	return root, nil
 }
 
-func (m *IMacCMS) xmlParseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
+func (m *IMacCMS) xmlParseList(doc *etree.Element) (*IMacCMSListAttr, []IMacCMSListVideoItem, error) {
 	var listAttr IMacCMSListAttr
 	var videos []IMacCMSListVideoItem
 	var parseVideo = func(ele *etree.Element) (IMacCMSListVideoItem, error) {
@@ -157,14 +157,14 @@ func (m *IMacCMS) xmlParseList(doc *etree.Element) (IMacCMSListAttr, []IMacCMSLi
 			}
 		}
 	}
-	return listAttr, videos, nil
+	return &listAttr, videos, nil
 }
 
-func (m *IMacCMS) XMLGetHomeWithEtreeRoot(root *etree.Element) (IMacCMSHomeData, error) {
-	var data IMacCMSHomeData
+func (m *IMacCMS) XMLGetHomeWithEtreeRoot(root *etree.Element) (*IMacCMSHomeData, error) {
 	if root == nil {
-		return data, errors.New("root is nil")
+		return nil, errors.New("root is nil")
 	}
+	var data IMacCMSHomeData
 	for _, child := range root.Child {
 		if c, ok := child.(*etree.Element); ok {
 			if m.xmlIsClassTagWithXMLElement(c) {
@@ -172,16 +172,16 @@ func (m *IMacCMS) XMLGetHomeWithEtreeRoot(root *etree.Element) (IMacCMSHomeData,
 			} else if m.xmlIsListTagWithXMLElement(c) {
 				listAttr, videos, err := m.xmlParseList(c)
 				if err != nil {
-					return data, err
+					return nil, err
 				}
-				data.ListHeader = listAttr
+				data.ListHeader = *listAttr
 				data.Videos = videos
 			} else {
 				continue
 			}
 		}
 	}
-	return data, nil
+	return &data, nil
 }
 
 func (m *IMacCMS) XMLGetCategoryWithEtreeRoot(root *etree.Element) []repos.IMacCMSCategory {
@@ -195,25 +195,25 @@ func (m *IMacCMS) XMLGetCategoryWithEtreeRoot(root *etree.Element) []repos.IMacC
 	return []repos.IMacCMSCategory{}
 }
 
-func (m *IMacCMS) XMLGetSearchWithEtreeRoot(root *etree.Element) (IMacCMSVideosAndHeader, error) {
+func (m *IMacCMS) XMLGetSearchWithEtreeRoot(root *etree.Element) (*IMacCMSVideosAndHeader, error) {
 	for _, el := range root.Child {
 		if e, ok := el.(*etree.Element); ok {
 			if m.xmlIsListTagWithXMLElement(e) {
 				a, b, c := m.xmlParseList(e)
 				if c != nil {
-					return IMacCMSVideosAndHeader{}, c
+					return nil, c
 				}
-				return IMacCMSVideosAndHeader{
-					ListHeader: a,
+				return &IMacCMSVideosAndHeader{
+					ListHeader: *a,
 					Videos:     b,
 				}, nil
 			}
 		}
 	}
-	return IMacCMSVideosAndHeader{}, errors.New("not found")
+	return nil, errors.New("not found")
 }
 
-func (m *IMacCMS) XMLGetDetailWithEtreeRoot(root *etree.Element) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
+func (m *IMacCMS) XMLGetDetailWithEtreeRoot(root *etree.Element) (*IMacCMSListAttr, []IMacCMSListVideoItem, error) {
 	for _, el := range root.Child {
 		if e, ok := el.(*etree.Element); ok {
 			if m.xmlIsListTagWithXMLElement(e) {
@@ -221,41 +221,45 @@ func (m *IMacCMS) XMLGetDetailWithEtreeRoot(root *etree.Element) (IMacCMSListAtt
 			}
 		}
 	}
-	return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, errors.New("")
+	return nil, nil, errors.New("not found")
 }
 
-func (m *IMacCMS) XMLGetHome(page int, tid ...int) (IMacCMSHomeData, error) {
+func (m *IMacCMS) XMLGetHome(page int, tid ...int) (*IMacCMSHomeData, error) {
 	res, err := m.qs.SetHome(page, tid).BuildGetRequest(m.ApiURL)
 	if err != nil {
-		return IMacCMSHomeData{}, err
+		return nil, err
 	}
 	doc := etree.NewDocument()
-	doc.ReadFromBytes(res)
+	if err := doc.ReadFromBytes(res); err != nil {
+		return nil, err
+	}
 	return m.XMLGetHomeWithEtreeRoot(doc.Root())
 }
 
 func (m *IMacCMS) XMLGetCategory() ([]repos.IMacCMSCategory, error) {
 	root, err := m.xmlGetURL2XMLDocumentWithRoot(m.ApiURL)
 	if err != nil {
-		return []repos.IMacCMSCategory{}, err
+		return nil, err
 	}
 	return m.XMLGetCategoryWithEtreeRoot(root), nil
 }
 
-func (m *IMacCMS) XMLGetSearch(keyword string, page int) (IMacCMSVideosAndHeader, error) {
+func (m *IMacCMS) XMLGetSearch(keyword string, page int) (*IMacCMSVideosAndHeader, error) {
 	res, err := m.qs.SetPage(page).SetKeyword(keyword).BuildPostRequest(m.ApiURL)
 	if err != nil {
-		return IMacCMSVideosAndHeader{}, err
+		return nil, err
 	}
 	doc := etree.NewDocument()
-	doc.ReadFromBytes(res)
+	if err := doc.ReadFromBytes(res); err != nil {
+		return nil, err
+	}
 	return m.XMLGetSearchWithEtreeRoot(doc.Root())
 }
 
-func (m *IMacCMS) XMLGetDetail(ids ...int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
+func (m *IMacCMS) XMLGetDetail(ids ...int) (*IMacCMSListAttr, []IMacCMSListVideoItem, error) {
 	res, err := m.qs.SetAction("videolist").SetIDS(ids...).BuildPostRequest(m.ApiURL)
 	if err != nil {
-		return IMacCMSListAttr{}, []IMacCMSListVideoItem{}, err
+		return nil, nil, err
 	}
 	doc := etree.NewDocument()
 	doc.ReadFromBytes(res)

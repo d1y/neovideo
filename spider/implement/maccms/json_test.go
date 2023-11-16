@@ -16,8 +16,9 @@ func readJSON(file string) []byte {
 	return buf
 }
 
-func readJSON2gjson(file string) gjson.Result {
-	return gjson.ParseBytes(readJSON(file))
+func readJSON2gjson(file string) *gjson.Result {
+	var js = gjson.ParseBytes(readJSON(file))
+	return &js
 }
 
 func TestJSONGetHome(t *testing.T) {

@@ -165,7 +165,7 @@ func (im *IMacCMSController) checkOnce(i *repos.MacCMSRepo) map[string]any {
 			if rt.IsJSON() {
 				if gjson.Valid(s) {
 					gp := gjson.Parse(s)
-					_, _, categorys := av.JsonParseBody(gp)
+					_, _, categorys := av.JsonParseBody(&gp)
 					if len(categorys) >= 1 {
 						m["category"] = datatypes.NewJSONSlice(categorys)
 					}

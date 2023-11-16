@@ -69,7 +69,7 @@ func (vc *IVodController) queryAndCMSFetchHome() ([]homeItem, error) {
 			if err != nil {
 				im.Error = err.Error()
 			} else {
-				im.Data = val
+				im.Data = *val
 			}
 			data = append(data, im)
 		}(item)

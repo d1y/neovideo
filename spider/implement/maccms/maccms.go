@@ -62,7 +62,7 @@ func GetResponseType(raw string) respType {
 func (m *IMacCMS) Request(xhr XHRRequest) {
 }
 
-func (m *IMacCMS) GetHome(page int, tid ...int) (IMacCMSHomeData, error) {
+func (m *IMacCMS) GetHome(page int, tid ...int) (*IMacCMSHomeData, error) {
 	if m.ResponseType == MacCMSReponseTypeJSON {
 		return m.JSONGetHome(page, tid...)
 	}
@@ -76,14 +76,14 @@ func (m *IMacCMS) GetCategory() ([]repos.IMacCMSCategory, error) {
 	return m.XMLGetCategory()
 }
 
-func (m *IMacCMS) GetDetail(ids ...int) (IMacCMSListAttr, []IMacCMSListVideoItem, error) {
+func (m *IMacCMS) GetDetail(ids ...int) (*IMacCMSListAttr, []IMacCMSListVideoItem, error) {
 	if m.ResponseType == MacCMSReponseTypeJSON {
 		return m.JSONGetDetail(ids...)
 	}
 	return m.XMLGetDetail(ids...)
 }
 
-func (m *IMacCMS) GetSearch(keyword string, p int) (IMacCMSVideosAndHeader, error) {
+func (m *IMacCMS) GetSearch(keyword string, p int) (*IMacCMSVideosAndHeader, error) {
 	if m.ResponseType == MacCMSReponseTypeJSON {
 		return m.JSONGetSearch(keyword, p)
 	}
