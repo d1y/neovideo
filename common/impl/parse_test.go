@@ -1,11 +1,10 @@
-package impl_test
+package impl
 
 import (
 	"fmt"
 	"os"
 	"testing"
 
-	"d1y.io/neovideo/common/impl"
 	"d1y.io/neovideo/spider/implement/maccms"
 )
 
@@ -15,7 +14,7 @@ func readFile(f string, ext string) string {
 }
 
 func TestParseMaccmsWithLines(t *testing.T) {
-	maccmsArray := impl.ParseMaccms(readFile("maccms1", "txt"))
+	maccmsArray := ParseMaccms(readFile("maccms1", "txt"))
 	if len(maccmsArray) != 2 {
 		t.FailNow()
 	}
@@ -29,7 +28,7 @@ func TestParseMaccmsWithLines(t *testing.T) {
 }
 
 func TestParseMaccmsWithJSON(t *testing.T) {
-	m := impl.ParseMaccms(readFile("maccms_array", "json"))
+	m := ParseMaccms(readFile("maccms_array", "json"))
 	if len(m) != 2 {
 		t.FailNow()
 	}
@@ -43,7 +42,7 @@ func TestParseMaccmsWithJSON(t *testing.T) {
 }
 
 func TestParseJiexiJSON(t *testing.T) {
-	jiexiArray := impl.ParseJiexi(readFile("jiexi_array", "json"))
+	jiexiArray := ParseJiexi(readFile("jiexi_array", "json"))
 	if len(jiexiArray) != 3 {
 		t.Fail()
 		return
@@ -62,7 +61,7 @@ func TestParseJiexiJSON(t *testing.T) {
 }
 
 func TestParseJiexiText(t *testing.T) {
-	jiexi := impl.ParseJiexi(readFile("jiexi1", "txt"))
+	jiexi := ParseJiexi(readFile("jiexi1", "txt"))
 	if len(jiexi) != 7 {
 		t.Log("parse len verification failed")
 		t.FailNow()

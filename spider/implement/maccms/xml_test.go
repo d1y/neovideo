@@ -1,4 +1,4 @@
-package maccms_test
+package maccms
 
 import (
 	"errors"
@@ -7,11 +7,10 @@ import (
 	"testing"
 
 	"d1y.io/neovideo/models/repos"
-	"d1y.io/neovideo/spider/implement/maccms"
 	"github.com/beevik/etree"
 )
 
-var cms = maccms.New(maccms.MacCMSReponseTypeXML, "https://ikunzyapi.com/api.php/provide/vod/at/xml")
+var cms = New(MacCMSReponseTypeXML, "https://ikunzyapi.com/api.php/provide/vod/at/xml")
 
 func readXML(file string) []byte {
 	f := filepath.Join("./testdata/xml", file+".xml")
