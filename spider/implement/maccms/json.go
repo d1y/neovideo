@@ -25,7 +25,7 @@ func (m *IMacCMS) gjsonResult2Time(r gjson.Result, key string) time.Time {
 
 func (m *IMacCMS) JsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMSListVideoItem, []repos.IMacCMSCategory) {
 
-	var attr IMacCMSListAttr
+	var attr = IMacCMSListAttr{}
 	ints := typekkkit.Int64Slice2Int(result.Get("pagecount").Int(), result.Get("page").Int(), result.Get("total").Int(), result.Get("limit").Int())
 	attr.PageCount = ints[0]
 	attr.Page = ints[1]
@@ -35,10 +35,10 @@ func (m *IMacCMS) JsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMS
 	_class := result.Get("class").Array()
 	_list := result.Get("list").Array()
 
-	var category []repos.IMacCMSCategory
-	var videos []IMacCMSListVideoItem
+	var category = make([]repos.IMacCMSCategory, len(_class))
+	var videos = make([]IMacCMSListVideoItem, len(_list))
 
-	for _, item := range _list {
+	for idx, item := range _list {
 		typeID := m.gjsonResult2Int(item, "type_id")
 		id := m.gjsonResult2Int(item, "vod_id")
 		if id == 0 {
@@ -46,20 +46,20 @@ func (m *IMacCMS) JsonParseBody(result gjson.Result) (IMacCMSListAttr, []IMacCMS
 		}
 		t := m.gjsonResult2Time(item, "vod_time")
 		name := m.gjsonResult2Str(item, "vod_name")
-		videos = append(videos, IMacCMSListVideoItem{
+		videos[idx] = IMacCMSListVideoItem{
 			Last: t,
 			Id:   id,
 			Tid:  typeID,
 			Name: name,
-		})
+		}
 	}
-	for _, item := range _class {
+	for idx, item := range _class {
 		id := m.gjsonResult2Int(item, "type_id")
 		name := m.gjsonResult2Str(item, "type_name")
-		category = append(category, repos.IMacCMSCategory{
+		category[idx] = repos.IMacCMSCategory{
 			Text: name,
 			Id:   id,
-		})
+		}
 	}
 	return attr, videos, category
 }
