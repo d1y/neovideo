@@ -88,11 +88,11 @@ func taskWrapper(sm *sync.Mutex, wg *sync.WaitGroup, idx int, cs *repos.MacCMSRe
 		}
 		logrus.Printf("[task] 开始爬取第%v页任务", idx+1)
 		cms := maccms.New(cs.RespType, cs.Api)
-		task := newTask(idx)
+		spiderTask := newTask(idx)
 		data, err := cms.GetHome(idx + 1)
 		if err != nil {
 			logrus.Errorf("[task] 爬取第%v页任务失败", idx+1)
-			task.SetFail(err.Error())
+			spiderTask.SetFail(err.Error())
 		} else {
 			logrus.Printf("[task] 爬取第%v页任务成功, 共爬取到%v条数据", idx+1, len(data.Videos))
 			ids := make([]int, len(data.Videos))
@@ -102,12 +102,12 @@ func taskWrapper(sm *sync.Mutex, wg *sync.WaitGroup, idx int, cs *repos.MacCMSRe
 			c := maccms.New(cs.RespType, cs.Api)
 			_, v, err := c.GetDetail(ids...)
 			if err == nil {
-				task.SetSuccessful(&v)
+				spiderTask.SetSuccessful(&v)
 			} else {
-				task.SetFail(err.Error())
+				spiderTask.SetFail(err.Error())
 			}
 			skipInsertSpiderTask := ok && !suf
-			insertData(task, cs, skipInsertSpiderTask, taskID)
+			insertData(spiderTask, cs, skipInsertSpiderTask, taskID)
 		}
 	}
 }
@@ -223,21 +223,21 @@ func querySpiderTask(mid uint, idx int) (taskID uint, successful bool, ok bool) 
 	q, st := gplus.NewQuery[other.SpiderTask]()
 	q.Eq(&st.Mid, mid)
 	q.Eq(&st.Page, idx)
-	task, gb := gplus.SelectOne(q)
+	spiderTask, gb := gplus.SelectOne(q)
 	if gb.Error != nil { /* ignore error stack */
 		ok = false
 		return
 	}
 	ok = true
-	taskID = task.ID
-	successful = task.Successful
+	taskID = spiderTask.ID
+	successful = spiderTask.Successful
 	return
 }
 
 func createFilename(url string) string {
 	ext := filepath.Ext(url)
-	uuid := uuid.New()
-	file := uuid.String()
+	guuid := uuid.New()
+	file := guuid.String()
 	file += ext
 	return file
 }
