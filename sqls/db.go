@@ -21,21 +21,21 @@ var (
 	sqlDB *sql.DB
 )
 
-func Open(dbConfig config.DbConfig, config *gorm.Config /*, models ...interface{}*/) (err error) {
-	if config == nil {
-		config = &gorm.Config{
+func Open(dbConfig config.DbConfig, gconf *gorm.Config /*, models ...interface{}*/) (err error) {
+	if gconf == nil {
+		gconf = &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
 		}
 	}
 
-	if config.NamingStrategy == nil {
-		config.NamingStrategy = schema.NamingStrategy{
+	if gconf.NamingStrategy == nil {
+		gconf.NamingStrategy = schema.NamingStrategy{
 			TablePrefix:   "t_",
 			SingularTable: true,
 		}
 	}
 
-	if db, err = gorm.Open(sqlite.Open(dbConfig.File), config); err != nil {
+	if db, err = gorm.Open(sqlite.Open(dbConfig.File), gconf); err != nil {
 		log.Errorf("opens database failed: %s", err.Error())
 		return
 	}
