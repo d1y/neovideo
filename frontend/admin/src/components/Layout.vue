@@ -36,13 +36,21 @@ onMounted(()=> {
 })
 const menus = [
   {
+    title: "系统面板",
+    path: "/dashboard",
+  },
+  {
     title: "解析源管理",
     path: "/jiexi",
   },
   {
     title: "苹果CMS管理",
     path: "/maccms",
-  }
+  },
+  {
+    title: "爬虫任务管理",
+    path: "/spider",
+  },
 ]
 </script>
 

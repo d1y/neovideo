@@ -20,6 +20,10 @@ const router = createRouter({
           path: "maccms",
           component: () => import("@/views/Maccms.vue"),
         },
+        {
+          path: "spider",
+          component: () => import("@/views/Spider.vue"),
+        },
       ],
     },
   ],
