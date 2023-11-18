@@ -6,10 +6,13 @@
           <h1 class="inline-flex text-white font-bold text-2xl">后台管理</h1>
         </div>
         <div class="text-white pl-4">
-          <p class="cursor-pointer m-2 mb-4 p-2" :style="{
+          <p class="cursor-pointer m-2 mb-4 p-2 flex items-center" :style="{
             backgroundColor: currentPath == item.path ? '#4d70ff' : '',
             borderRadius: `4px`,
-          }" v-for="item in menus" @click="$router.push(item.path)">{{ item.title }}</p>
+          }" v-for="item in menus" @click="$router.push(item.path)">
+          <el-icon><component :is="item.icon" /></el-icon>
+          <span class="ml-[12px]">{{ item.title }}</span>
+          </p>
         </div>
       </el-aside>
       <el-main>
@@ -38,18 +41,22 @@ const menus = [
   {
     title: "系统面板",
     path: "/dashboard",
+    icon: "HomeFilled",
   },
   {
     title: "解析源管理",
     path: "/jiexi",
+    icon: "Compass",
   },
   {
     title: "苹果CMS管理",
     path: "/maccms",
+    icon: "Grid",
   },
   {
     title: "爬虫任务管理",
     path: "/spider",
+    icon: "Odometer",
   },
 ]
 </script>
