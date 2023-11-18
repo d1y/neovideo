@@ -1,17 +1,17 @@
 <template>
   <div class="common-layout">
     <el-container class="w-full h-full">
-      <el-aside class="h-full bg-[#191a23] box-border p-4" width="240px">
-        <div class="flex items-center justify-center mb-4">
-          <h1 class="inline-flex text-white font-bold text-2xl">后台管理</h1>
-        </div>
+      <el-aside class="h-full bg-[#191a23] box-border" :width="width" :style="{
+        padding: isExpand ? '1rem' : '0',
+        transition: 'all .12s',
+      }">
         <div class="text-white pl-4">
           <p class="cursor-pointer m-2 mb-4 p-2 flex items-center" :style="{
             backgroundColor: currentPath == item.path ? '#4d70ff' : '',
             borderRadius: `4px`,
           }" v-for="item in menus" @click="$router.push(item.path)">
-          <el-icon><component :is="item.icon" /></el-icon>
-          <span class="ml-[12px]">{{ item.title }}</span>
+            <el-icon><component :is="item.icon" /></el-icon>
+            <span class="ml-[12px]" v-if="isExpand">{{ item.title }}</span>
           </p>
         </div>
       </el-aside>
@@ -23,12 +23,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
 import router from '@/router'
-import { onMounted } from "vue"
+import { onMounted, computed, ref } from "vue"
 import { useRoute } from "vue-router"
 
 const route = useRoute()
+
+const isExpand = ref<boolean>(true)
+
+const width = computed(()=> {
+  if (isExpand.value) return `240px`
+  return `64px`
+})
+
+function toggleExpand() {
+  isExpand.value = !isExpand.value
+}
+
+// bind cmd+b like vscode
+function bindCmdB() {
+  window.addEventListener('keydown', (e)=> {
+    if (e.key === "b" && e.metaKey) {
+      toggleExpand()
+    }
+  })
+}
 
 const currentPath = ref('')
 router.afterEach((to)=> {
